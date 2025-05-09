@@ -1,0 +1,210 @@
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+}
+
+
+
+.hero {
+    display: flex;
+    justify-content: center; /* ubah dari space-around ke center */
+    align-items: center;
+    padding: 40px 20px;
+    background: #f9f9f9;
+    flex-wrap: wrap;
+    gap: 40px; /* bisa disesuaikan, misalnya dari 100px jadi 40px */
+}
+
+.hero-content {
+    max-width: 500px;
+    text-align: center;
+}
+
+.hero-content .logo {
+    width: 100px;
+    margin-bottom: 20px;
+}
+
+.ayat {
+    font-style: italic;
+    margin-top: 10px;
+}
+
+.hero-image img {
+    width: 250px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Arial', sans-serif;
+    background: #fff;
+  }
+
+  .upcoming-event {
+    text-align: center;
+    padding: 50px 20px;
+  }
+
+  h2 {
+    font-size: 32px;
+    margin-bottom: 30px;
+  }
+
+  .carousel-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .arrow {
+    background: none;
+    border: none;
+    font-size: 40px;
+    cursor: pointer;
+    color: #333;
+    z-index: 5;
+  }
+
+  .carousel {
+    display: flex;
+    flex-wrap: wrap; /* agar bisa responsif */
+    gap: 20px;
+    justify-content: center;
+    width: 100%; /* penuh */
+    overflow: visible; /* tampilkan semua */
+    transform: none !important; /* nonaktifkan animasi geser */
+  }
+
+  .card {
+    background: #111;
+    color: white;
+    width: 250px;
+    border-radius: 15px;
+    overflow: hidden;
+    transform: scale(0.95);
+    opacity: 0.8;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  }
+
+  .card.active {
+    border: 3px solid #3fa0ff;
+    transform: scale(1.05);
+    opacity: 1;
+    z-index: 2;
+  }
+
+  .card img {
+    width: 100%;
+    height: 160px;
+    object-fit: cover;
+  }
+
+  .info {
+    padding: 20px;
+  }
+
+  .info h3 {
+    margin-bottom: 10px;
+    font-size: 20px;
+  }
+
+  .info p {
+    font-size: 14px;
+    margin-bottom: 15px;
+  }
+
+  .info button {
+    padding: 8px 16px;
+    background: white;
+    color: #333;
+    border: none;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .info button:hover {
+    background: #3fa0ff;
+    color: white;
+  }
+
+  .indicators {
+    margin-top: 20px;
+  }
+
+  .dot {
+    height: 12px;
+    width: 12px;
+    margin: 0 5px;
+    background: #bbb;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+  }
+
+  .dot.active {
+    background: #3fa0ff;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .carousel {
+      width: 100%;
+    }
+
+    .card {
+      width: 200px;
+    }
+  }
+
+.documentation {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f9f9f9;
+}
+
+.doc-gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.doc-item {
+    width: 320px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.doc-item img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
+.doc-item p {
+    margin: 0;
+    padding: 15px 10px;
+    font-weight: bold;
+    font-size: 16px;
+    text-align: center;
+    background: white;
+    height: 70px; /* Tetap untuk caption 2 baris */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
