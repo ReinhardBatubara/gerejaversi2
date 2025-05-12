@@ -25,7 +25,7 @@ Route::get('/jadwal', function () {
 
 // Route ke dashboard admin
 Route::get('/dashboardadmin', function () {
-    return view('admin.dashboard'); // nanti kita buat view-nya
+    return view('dashboard'); // nanti kita buat view-nya
 });
 
 // Route untuk Warta
@@ -70,7 +70,7 @@ Route::delete('/admin/warta/{id}', [AdminWartaController::class, 'destroy'])->na
 
 // Route dashboard, hanya bisa diakses jika sudah login dan terverifikasi
 Route::get('/dashboard', function () {
-    return view('admin.dashboard'); // nanti kita buat view-nya
+    return view('dashboard'); // nanti kita buat view-nya
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 // Profile routes
@@ -80,7 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // Route untuk jadwal
 Route::get('/jadwal', [JadwalController::class, 'edit'])->name('jadwal.edit');
