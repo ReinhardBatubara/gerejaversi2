@@ -7,12 +7,17 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\AdminJadwalController;
+use App\Http\Controllers\CongregationController;
+
 
 /*
 |----------------------------------------------------------------------
 | Web Routes
 |----------------------------------------------------------------------
 */
+
+// RAPIKAN DULU ROUTE NYA INI SEMUA, PASTIKAN SEMUA ROUTENYA YG DI LIST DISINI KE PAKE
+
 
 Route::get('/', function () {
     return view('beranda');
@@ -70,8 +75,15 @@ Route::delete('/admin/warta/{id}', [AdminWartaController::class, 'destroy'])->na
 
 // Route dashboard, hanya bisa diakses jika sudah login dan terverifikasi
 Route::get('/dashboard', function () {
-    return view('dashboard'); // nanti kita buat view-nya
+    return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
+
+Route::get('/congregations', function () {
+    return view('congregations');
+})->middleware(['auth', 'verified'])->name('congregations');
+Route::resource('congregations', CongregationController::class);
+Route::get('/admin/congregations', [CongregationController::class, 'index'])->name('admin.congregations.index');
+
 
 // Profile routes
 Route::middleware('auth')->group(function () {

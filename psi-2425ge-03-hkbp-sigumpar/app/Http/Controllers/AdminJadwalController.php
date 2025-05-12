@@ -31,7 +31,9 @@ class AdminJadwalController extends Controller
             }
 
             JadwalIbadah::updateOrCreate(
-                ['nama' => $item['nama']], // Cari berdasarkan nama saja, bukan id
+                // ['nama' => $item['nama']],
+                ['nama' => $item['nama'], 'tanggal' => $item['tanggal']],
+                // Cari berdasarkan nama saja, bukan id
                 [
                     'tanggal' => $item['tanggal'],
                     'jam_mulai' => $item['jam_mulai'],
