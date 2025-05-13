@@ -37,6 +37,7 @@ Route::get('/dashboardadmin', function () {
 Route::get('/warta', function () {
     return view('warta.warta'); // arahkan ke folder resources/views/warta/warta.blade.php
 });
+
 Route::get('/warta', [AdminWartaController::class, 'indexUser'])->name('user.warta');
 
 // Route untuk profil gereja
@@ -67,11 +68,8 @@ Route::post('/wartaadd', [AdminWartaController::class, 'store'])->name('admin.wa
 // Menampilkan form tambah warta
 Route::get('/wartaadd', [AdminWartaController::class, 'create'])->name('admin.warta.create');
 
-// Mendownload file warta
-Route::get('/admin/warta/download/{id}', [AdminWartaController::class, 'download'])->name('admin.warta.download');
-
-// Menghapus warta
-Route::delete('/admin/warta/{id}', [AdminWartaController::class, 'destroy'])->name('admin.warta.destroy');
+//Route::get('/admin/warta/download/{id}', [AdminWartaController::class, 'download'])->name('admin.warta.download');
+// Route::delete('/admin/warta/{id}', [AdminWartaController::class, 'destroy'])->name('admin.warta.destroy');
 
 // Route dashboard, hanya bisa diakses jika sudah login dan terverifikasi
 Route::get('/dashboard', function () {

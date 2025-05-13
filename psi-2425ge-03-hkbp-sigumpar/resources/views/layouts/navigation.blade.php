@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('admin.congregations.index')" :active="request()->routeIs('admin.congregations.index')">
                         {{ __('Manage Congregation') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('admin.warta.index')" :active="request()->routeIs('admin.warta.index')">
+                        {{ __('Warta') }}
+                    </x-nav-link>
 
 
                 </div>
