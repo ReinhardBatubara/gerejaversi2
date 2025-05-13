@@ -1,9 +1,6 @@
 <x-app-layout>
     <link rel="stylesheet" href="/css/beranda.css">
 
-    {{-- Hero and Events Sections (unchanged) --}}
-
-    {{-- New Section: Data Jemaat --}}
     <section class="upcoming-event px-6 py-10 bg-gray-100">
         <h2 class="text-3xl font-semibold text-center text-gray-800 mb-8">Data Jemaat</h2>
 
@@ -16,10 +13,28 @@
                 </a>
             </div>
 
+            {{-- Filter tanggal --}}
+            <form method="GET" action="{{ route('congregations.index') }}" class="mb-4">
+                <div class="flex items-center gap-4">
+                    <label for="tanggal" class="text-gray-700 font-medium">Filter Tanggal:</label>
+                    <input type="date" name="tanggal" id="tanggal" value="{{ request('tanggal') }}"
+                        class="border-gray-300 rounded-md shadow-sm">
+                    <button type="submit"
+                        class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md shadow">
+                        Cari
+                    </button>
+                    <a href="{{ route('congregations.index') }}"
+                        class="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md shadow">
+                        Reset
+                    </a>
+                </div>
+            </form>
+
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-200 text-gray-700">
                         <tr>
+                            <th class="px-4 py-3 text-left text-sm font-semibold">Tanggal</th>
                             <th class="px-4 py-3 text-left text-sm font-semibold">Jumlah</th>
                             <th class="px-4 py-3 text-left text-sm font-semibold">Gender</th>
                             <th class="px-4 py-3 text-left text-sm font-semibold">Kategori Usia</th>
@@ -27,8 +42,9 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
-                        @foreach ($congregations as $item)
+                        @forelse ($congregations as $item)
                             <tr>
+                                <td class="px-4 py-2">{{ \Carbon\Carbon::parse($item->tanggal)->format('d-m-Y') }}</td>
                                 <td class="px-4 py-2">{{ $item->jumlah }}</td>
                                 <td class="px-4 py-2">{{ $item->gender }}</td>
                                 <td class="px-4 py-2">{{ $item->age_categories }}</td>
@@ -46,19 +62,16 @@
                                     </form>
                                 </td>
                             </tr>
-                        @endforeach
-
-                        @if ($congregations->isEmpty())
+                        @empty
                             <tr>
-                                <td colspan="4" class="text-center py-4 text-gray-500">Belum ada data jemaat.</td>
+                                <td colspan="5" class="text-center py-4 text-gray-500">Belum ada data jemaat.</td>
                             </tr>
-                        @endif
+                        @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </section>
 
-    {{-- Existing Documentation Section --}}
     <script src="/public/js/script.js"></script>
 </x-app-layout>

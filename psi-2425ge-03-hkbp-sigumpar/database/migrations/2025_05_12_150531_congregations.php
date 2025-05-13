@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('jumlah');
             $table->string('gender');
             $table->string('age_categories');
+            $table->date('tanggal');
             $table->timestamps();
         });
     }
@@ -23,8 +24,5 @@ return new class extends Migration
     /**
      * Reverse the migrations.
      */
-    public function down(): void
-    {
-        //
-    }
+    public function down(): void {}
 };

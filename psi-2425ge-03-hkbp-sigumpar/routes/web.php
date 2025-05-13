@@ -83,6 +83,9 @@ Route::get('/congregations', function () {
 })->middleware(['auth', 'verified'])->name('congregations');
 Route::resource('congregations', CongregationController::class);
 Route::get('/admin/congregations', [CongregationController::class, 'index'])->name('admin.congregations.index');
+Route::get('/congregations/stats', [CongregationController::class, 'stats'])->name('admin.congregations.stats');
+Route::get('/congregations/{id}/edit', [CongregationController::class, 'edit'])->name('congregations.edit');
+Route::put('/congregations/{id}', [CongregationController::class, 'update'])->name('congregations.update');
 
 
 // Profile routes

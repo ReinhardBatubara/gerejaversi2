@@ -8,5 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class Congregation extends Model
 {
     use HasFactory;
-    protected $fillable = ['jumlah', 'gender', 'age_categories'];
+    protected $fillable = ['jumlah', 'gender', 'age_categories', 'tanggal'];
 }
