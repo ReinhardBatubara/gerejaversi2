@@ -57,20 +57,7 @@ class CongregationController extends Controller
         $congregation = Congregation::findOrFail($id);
         return view('admin.congregation.edit', compact('congregation'));
     }
-    // public function update(Request $request, $id)
-    // {
-    //     $request->validate([
-    //         'tanggal' => 'required|date',
-    //         'jumlah' => 'required|integer|min:1',
-    //         'gender' => 'required|in:Laki-laki,Perempuan',
-    //         'age_categories' => 'required|in:Anak-anak,Remaja,Dewasa,Lansia',
-    //     ]);
 
-    //     $congregation = Congregation::findOrFail($id);
-    //     $congregation->update($request->all());
-
-    //     return view('admin.congregation.index', compact('congregation'));
-    //}
     public function update(Request $request, $id)
     {
         $request->validate([
