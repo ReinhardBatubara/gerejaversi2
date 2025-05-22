@@ -9,8 +9,7 @@ class AdminJadwalController extends Controller
 {
     public function edit()
     {
-        // Ambil semua jadwal, dikelompokkan berdasarkan nama ibadah
-        $jadwal = JadwalIbadah::orderBy('jam_mulai')->get()->keyBy('nama');
+        $jadwal = JadwalIbadah::orderBy('jam_mulai')->get();
         return view('jadwal.AdminJadwal', compact('jadwal'));
     }
 
@@ -18,6 +17,7 @@ class AdminJadwalController extends Controller
     {
         $data = $request->validate([
             'jadwal' => 'required|array',
+            'jadwal.*.id' => 'nullable|exists:jadwal_ibadah,id',
             'jadwal.*.nama' => 'required|string|max:255',
             'jadwal.*.tanggal' => 'required|date',
             'jadwal.*.jam_mulai' => 'required|date_format:H:i',
@@ -26,15 +26,15 @@ class AdminJadwalController extends Controller
         ]);
 
         foreach ($data['jadwal'] as $item) {
+            // Validasi agar jam_selesai harus setelah jam_mulai untuk masing-masing entri
             if (strtotime($item['jam_selesai']) <= strtotime($item['jam_mulai'])) {
-                return back()->withErrors(['Jam selesai harus setelah jam mulai untuk ' . $item['nama']])->withInput();
+                return back()->withErrors(['Jadwal ' . $item['nama'] . ': Jam selesai harus setelah jam mulai.'])->withInput();
             }
 
             JadwalIbadah::updateOrCreate(
-                // ['nama' => $item['nama']],
-                ['nama' => $item['nama'], 'tanggal' => $item['tanggal']],
-                // Cari berdasarkan nama saja, bukan id
+                ['id' => $item['id'] ?? null],
                 [
+                    'nama' => $item['nama'],
                     'tanggal' => $item['tanggal'],
                     'jam_mulai' => $item['jam_mulai'],
                     'jam_selesai' => $item['jam_selesai'],

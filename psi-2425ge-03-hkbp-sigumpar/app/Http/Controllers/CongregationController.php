@@ -22,13 +22,13 @@ class CongregationController extends Controller
         }
 
         $congregations = $query->get();
-        return view('admin.congregation.index', compact('congregations'));
+        return view('halaman.congregation.index', compact('congregations'));
     }
 
 
     public function create()
     {
-        return view('admin.congregation.create');
+        return view('halaman.congregation.create');
     }
 
     public function store(Request $request)
@@ -42,20 +42,20 @@ class CongregationController extends Controller
 
         Congregation::create($request->all());
         $congregations = Congregation::all();
-        return view('admin.congregation.index', compact('congregations'));
+        return view('halaman.congregation.index', compact('congregations'));
         // return redirect()->route('congregation.index')->with('success', 'Data added successfully.');
     }
 
     public function show(Congregation $congregation)
     {
-        return view('admin.congregation.index', compact('congregation'));
+        return view('halaman.congregation.index', compact('congregation'));
     }
 
 
     public function edit($id)
     {
         $congregation = Congregation::findOrFail($id);
-        return view('admin.congregation.edit', compact('congregation'));
+        return view('halaman.congregation.edit', compact('congregation'));
     }
 
     public function update(Request $request, $id)
@@ -81,16 +81,18 @@ class CongregationController extends Controller
     }
 
     // Menampilkan statistik dalam bentuk diagram
-    public function stats()
+    public function statistics()
     {
-        $byGender = Congregation::select('gender', DB::raw('SUM(jumlah) as total'))
-            ->groupBy('gender')
-            ->pluck('total', 'gender');
+        $data = Congregation::select('tanggal', 'gender', 'age_categories', DB::raw('SUM(jumlah) as total'))
+            ->groupBy('tanggal', 'gender', 'age_categories')
+            ->orderBy('tanggal')
+            ->get();
 
-        $byAgeCategory = Congregation::select('age_categories', DB::raw('SUM(jumlah) as total'))
-            ->groupBy('age_categories')
-            ->pluck('total', 'age_categories');
+        // Format data for charts
+        $byDate = $data->groupBy('tanggal')->map->sum('total');
+        $byGender = $data->groupBy('gender')->map->sum('total');
+        $byAge = $data->groupBy('age_categories')->map->sum('total');
 
-        return view('admin.congregation.stats', compact('byGender', 'byAgeCategory'));
+        return view('halaman.congregation.statistics', compact('byDate', 'byGender', 'byAge'));
     }
 }

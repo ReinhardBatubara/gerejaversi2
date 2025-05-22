@@ -15,6 +15,11 @@ class ReservasiController extends Controller
         return view('reservasi.index'); // tampilan daftar jenis reservasi
     }
 
+    public function adminindex()
+    {
+        return view('reservasi.admin.index'); // tampilan daftar jenis reservasi
+    }
+
     /**
      * Show the form for creating a new resource.
      */

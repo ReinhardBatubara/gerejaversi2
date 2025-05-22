@@ -1,128 +1,79 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReservasiController;
-use App\Http\Controllers\AdminWartaController;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\GoogleAuthController;
+use App\Http\Controllers\WartaController;
+use App\Http\Controllers\JemaatController;
+use App\Http\Controllers\LayananGerejaController;
+use App\Http\Controllers\EventController;
+use App\Http\Controllers\CongregationController;
+use App\Http\Controllers\FrontController;
 use App\Http\Controllers\JadwalController;
 use App\Http\Controllers\NotificationController;
-use App\Http\Controllers\AdminJadwalController;
-use App\Http\Controllers\CongregationController;
+use App\Models\Notification;
+use Illuminate\Support\Facades\Route;
 
+// Public Routes (No login required)
+Route::get('/', [EventController::class, 'events'])->name('dashboard');  // Dashboard is accessible without login
+Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal');
+Route::get('/warta', [WartaController::class, 'index'])->name('warta.index');
+Route::view('/profilegereja', 'halaman.profilegereja.admin.profilegereja')->name('profilegereja');
 
-/*
-|----------------------------------------------------------------------
-| Web Routes
-|----------------------------------------------------------------------
-*/
-
-// RAPIKAN DULU ROUTE NYA INI SEMUA, PASTIKAN SEMUA ROUTENYA YG DI LIST DISINI KE PAKE
-
-
-Route::get('/', function () {
-    return view('beranda');
-});
-
-// Route untuk jadwal
-Route::get('/jadwal', function () {
-    return view('jadwal.jadwal');
-});
-
-// Route ke dashboard admin
-Route::get('/dashboardadmin', function () {
-    return view('dashboard'); // nanti kita buat view-nya
-});
-
-// Route untuk Warta
-Route::get('/warta', function () {
-    return view('warta.warta'); // arahkan ke folder resources/views/warta/warta.blade.php
-});
-
-Route::get('/warta', [AdminWartaController::class, 'indexUser'])->name('user.warta');
-
-// Route untuk profil gereja
-Route::get('/profil-gereja', function () {
-    return view('profil gereja.profilgereja');
-});
-
-// Route Admin Jadwal
-Route::get('/AdminJadwal', function () {
-    return redirect('/jadwal/AdminJadwal');
-});
-
-Route::get('/jadwal/AdminJadwal', [AdminJadwalController::class, 'edit'])->name('jadwal.edit');
-Route::post('/jadwal/AdminJadwal', [AdminJadwalController::class, 'update'])->name('jadwal.update');
-Route::put('/jadwal/AdminJadwal', [AdminJadwalController::class, 'update'])->name('jadwal.update');
-
-
-// Route untuk fitur reservasi
-Route::get('/reservasi', [ReservasiController::class, 'index']);
-Route::get('/reservasi/{jenis}', [ReservasiController::class, 'showForm']);
-
-// Menampilkan daftar warta admin
-Route::get('/wartaadmin', [AdminWartaController::class, 'index'])->name('admin.warta.index');
-
-// Menyimpan data warta
-Route::post('/wartaadd', [AdminWartaController::class, 'store'])->name('admin.warta.store');
-
-// Menampilkan form tambah warta
-Route::get('/wartaadd', [AdminWartaController::class, 'create'])->name('admin.warta.create');
-
-//Route::get('/admin/warta/download/{id}', [AdminWartaController::class, 'download'])->name('admin.warta.download');
-// Route::delete('/admin/warta/{id}', [AdminWartaController::class, 'destroy'])->name('admin.warta.destroy');
-
-// Route dashboard, hanya bisa diakses jika sudah login dan terverifikasi
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-
-// Profile routes
-// Route::middleware('auth')->group(function () {
-//     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-//     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-//     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-// });
-
-require __DIR__ . '/auth.php';
-
-// Route untuk jadwal
-Route::get('/jadwal', [JadwalController::class, 'edit'])->name('jadwal.edit');
-
-// Halaman Notifikasi
-Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-
-//Admin
+// Authenticated routes with verification middleware
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // ✅ Dashboard (Admin)
-    Route::get('/dashboard', fn() => view('dashboard'))->name('dashboard');
+    // Static views
+    Route::view('/profilegereja', 'halaman.profilegereja.admin.profilegereja')->name('profilegereja');
 
-    // ✅ Admin Jadwal
+    // Mass update and resource route for Jadwal
+    Route::put('/jadwal/mass-update', [JadwalController::class, 'massUpdate'])->name('jadwal.massUpdate');
+    Route::resource('jadwal', JadwalController::class)->middleware('role:admin|user');
 
+    // Layanan Gereja route
+    Route::get('/layanan', [LayananGerejaController::class, 'index'])->name('layanan');
 
-    // ✅ Warta (Admin)
-    Route::prefix('admin/warta')->group(function () {
-        Route::get('/', [AdminWartaController::class, 'index'])->name('admin.warta.index');
-        Route::get('/create', [AdminWartaController::class, 'create'])->name('admin.warta.create');
-        Route::post('/store', [AdminWartaController::class, 'store'])->name('admin.warta.store');
-        Route::get('/download/{id}', [AdminWartaController::class, 'download'])->name('admin.warta.download');
-        Route::delete('/{id}', [AdminWartaController::class, 'destroy'])->name('admin.warta.destroy');
-    });
+    // Pemberitahuan with controller
+    Route::get('/pemberitahuan', [NotificationController::class, 'index'])->name('pemberitahuan');
+    Route::post('/pemberitahuan/{id}/mark-as-read', [NotificationController::class, 'markAsRead'])->name('pemberitahuan.markAsRead');
 
-    // ✅ Congregation
+    // Layanan Gereja resource routes
+    Route::get('/layanangereja', [LayananGerejaController::class, 'index'])->name('layanangereja.index');
+    Route::get('/layanangereja/create', [LayananGerejaController::class, 'create'])->name('layanangereja.create');
+    Route::post('/layanangereja', [LayananGerejaController::class, 'store'])->name('layanangereja.store');
+    Route::post('/layanan/{id}/status', [LayananGerejaController::class, 'updateStatus'])->name('layanan.updateStatus');
+
+    // Congregations resource with admin role middleware on specific routes
     Route::resource('congregations', CongregationController::class)->except(['show']);
-    Route::resource('congregations', CongregationController::class);
-    Route::get('/admin/congregations', [CongregationController::class, 'index'])->name('admin.congregations.index');
-    Route::get('/congregations/stats', [CongregationController::class, 'stats'])->name('admin.congregations.stats');
-    Route::get('/congregations/{id}/edit', [CongregationController::class, 'edit'])->name('congregations.edit');
-    Route::put('/congregations/{id}', [CongregationController::class, 'update'])->name('congregations.update');
+    Route::get('/admin/congregations', [CongregationController::class, 'index'])
+        ->name('halaman.congregations.index')->middleware('role:admin');
+    Route::get('/congregations/{id}/edit', [CongregationController::class, 'edit'])
+        ->name('congregations.edit')->middleware('role:admin');
+    Route::put('/congregations/{id}', [CongregationController::class, 'update'])
+        ->name('congregations.update')->middleware('role:admin');
+    Route::get('/congregations/statistics', [CongregationController::class, 'statistics'])
+        ->name('congregations.statistics')->middleware('role:admin');
 
-
-    // ✅ Profile
-    Route::prefix('profile')->group(function () {
-        Route::get('/', [ProfileController::class, 'edit'])->name('profile.edit');
-        Route::patch('/', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/', [ProfileController::class, 'destroy'])->name('profile.destroy');
-    });
+    // Warta and Jadwal resources with role middleware
+    Route::resource('warta', WartaController::class)->middleware('role:admin');
+    Route::resource('jadwal', JadwalController::class)->middleware('role:admin|user');
 });
+
+// Profile management routes (auth required)
+Route::middleware('auth')->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+// Authentication routes
+require __DIR__ . '/auth.php';
+
+// Google OAuth routes
+Route::get('login/google', [GoogleAuthController::class, 'redirectToGoogle']);
+Route::get('login/google/callback', [GoogleAuthController::class, 'handleGoogleCallback']);
+
+// Admin routes prefix
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::resource('events', EventController::class);
+});
+

@@ -26,12 +26,15 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
+        // Mengisi model user dengan data validasi termasuk 'wa_number'
         $request->user()->fill($request->validated());
 
+        // Jika email berubah, reset verifikasi email
         if ($request->user()->isDirty('email')) {
             $request->user()->email_verified_at = null;
         }
 
+        // Simpan perubahan user (termasuk wa_number)
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

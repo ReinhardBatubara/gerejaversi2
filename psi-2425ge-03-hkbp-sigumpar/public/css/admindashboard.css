@@ -1,0 +1,29 @@
+.event-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.event-card {
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 10px;
+    background: #f9f9f9;
+}
+
+.event-card h3 {
+    margin-top: 10px;
+}
+
+.btn {
+    padding: 8px 12px;
+    border: none;
+    color: white;
+    text-decoration: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.btn-primary { background-color: #007bff; }
+.btn-warning { background-color: #ffc107; }
+.btn-danger { background-color: #dc3545; }

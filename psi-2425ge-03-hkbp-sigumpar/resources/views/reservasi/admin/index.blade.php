@@ -35,7 +35,7 @@
 </head>
 
 <body>
-@include('navbar')
+@include('navbaradmin')
 
 <div class="container">
     <div class="card reservasi-card p-4">

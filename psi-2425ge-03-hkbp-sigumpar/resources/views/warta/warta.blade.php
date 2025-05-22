@@ -11,22 +11,22 @@
       margin-bottom: 20px;
       border: 1px solid #ccc;
     }
-
+  
     table {
       width: 100%;
       border-collapse: collapse;
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     }
-
+  
     table, th, td {
       border: 1px solid #ddd;
     }
-
+  
     th, td {
       padding: 8px;
       text-align: left;
     }
-
+  
     button {
       background-color: transparent;
       color: black;
@@ -38,64 +38,26 @@
       cursor: pointer;
       transition: background-color 0.3s, color 0.3s;
     }
-
+  
     button:hover {
       background-color: #0f85ce;
-      color: white;
     }
-
+  
     .see-more {
       margin-top: 20px;
       text-align: center;
     }
-
+  
     .hidden-row {
       display: none;
     }
-
-    /* Style untuk popup */
-    #popup-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-    }
-
-    #popup {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      z-index: 1000;
-      width: 80%;
-      max-width: 800px;
-    }
-
-    .popup-content {
-      max-height: 400px;
-      overflow-y: auto;
-    }
-
-    .close {
-      position: absolute;
-      top: 10px;
-      right: 15px;
-      background: none;
-      border: none;
-      font-size: 20px;
-      cursor: pointer;
-    }
-  </style>
+  </style>  
 </head>
 <body>
 
+
   {{-- NAVBAR --}}
-  @include('navbar') {{-- Cukup satu navbar di sini --}}
+  @include('navbar') {{-- Pastikan hanya ada satu navbar di sini --}}
 
   {{-- KONTEN UTAMA --}}
   <main class="warta-section" style="padding: 20px;">
@@ -108,6 +70,9 @@
       <p>Tidak ada warta terbaru.</p>
     @endif
 
+@include('navbar')
+
+
     <h3>Daftar Warta Jemaat</h3>
     <table>
       <thead>
@@ -117,6 +82,141 @@
         </tr>
       </thead>
       <tbody>
+
+        <tr>
+          <td>Warta 23 Maret 2025</td>
+          <td>
+            <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+              Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Warta 16 Maret 2025</td>
+          <td>
+            <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+              Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Warta 09 Maret 2025</td>
+          <td>
+            <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+              Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Warta 02 Maret 2025</td>
+          <td>
+            <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+              Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Warta 23 Februari 2025</td>
+          <td>
+            <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+              Download
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td>Warta 16 Februari 2025</td>
+          <td>
+            <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+              Download
+            </a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Tombol untuk membuka popup "See More" -->
+    <div class="see-more">
+      <a href="#" onclick="openPopup()">See More..</a>
+    </div>
+  </main>
+
+  <!-- Overlay dan Popup -->
+  <div id="popup-overlay" onclick="closePopup()"></div>
+  <div id="popup">
+    <button class="close" onclick="closePopup()">X</button>
+    <div class="popup-content">
+      <h3>Warta Jemaat</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Judul</th>
+            <th>Download</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Warta 09 Februari 2025</td>
+            <td>
+              <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+                Download
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Warta 02 Februari 2025</td>
+            <td>
+              <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+                Download
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Warta 26 Januari 2025</td>
+            <td>
+              <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+                Download
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Warta 19 Januari 2025</td>
+            <td>
+              <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+                Download
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Warta 12 Januari 2025</td>
+            <td>
+              <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+                Download
+              </a>
+            </td>
+          </tr>
+          <tr>
+            <td>Warta 05 Januari 2025</td>
+            <td>
+              <a href="{{ asset('pdf/23 MARET 2025 y (2).pdf') }}" class="btn-download" download>
+                Download
+              </a>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    function openPopup() {
+      document.getElementById("popup").style.display = "block";
+      document.getElementById("popup-overlay").style.display = "block";
+    }
+
+    function closePopup() {
+      document.getElementById("popup").style.display = "none";
+      document.getElementById("popup-overlay").style.display = "none";
+
         @foreach ($wartas as $index => $warta)
           <tr class="{{ $index >= 5 ? 'hidden-row' : '' }}">
             <td>{{ $warta->judul }}</td>
@@ -130,40 +230,10 @@
       </tbody>
     </table>
 
-    {{-- Tombol Lihat Lebih Banyak --}}
     <div class="see-more">
       <button onclick="showMore(this)">Lihat Lebih Banyak..</button>
     </div>
   </main>
-
-  {{-- POPUP untuk Warta Tambahan --}}
-  <div id="popup-overlay" onclick="closePopup()"></div>
-  <div id="popup">
-    <button class="close" onclick="closePopup()">×</button>
-    <div class="popup-content">
-      <h3>Warta Jemaat</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Judul</th>
-            <th>Download</th>
-          </tr>
-        </thead>
-        <tbody>
-          @foreach ($wartas->slice(5) as $warta)
-            <tr>
-              <td>{{ $warta->judul }}</td>
-              <td>
-                <a href="{{ asset('storage/' . $warta->file_path) }}" download>
-                  <button>Download</button>
-                </a>
-              </td>
-            </tr>
-          @endforeach
-        </tbody>
-      </table>
-    </div>
-  </div>
 
   {{-- SCRIPT --}}
   <script>
@@ -176,16 +246,6 @@
       const hiddenRows = document.querySelectorAll('.hidden-row');
       hiddenRows.forEach(row => row.style.display = 'table-row');
       button.style.display = 'none';
-    }
-
-    function openPopup() {
-      document.getElementById('popup').style.display = 'block';
-      document.getElementById('popup-overlay').style.display = 'block';
-    }
-
-    function closePopup() {
-      document.getElementById('popup').style.display = 'none';
-      document.getElementById('popup-overlay').style.display = 'none';
     }
   </script>
 

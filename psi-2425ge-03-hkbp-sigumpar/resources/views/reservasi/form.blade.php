@@ -88,10 +88,6 @@
                     <label class="form-label">Nama Orang Tua</label>
                     <input type="text" name="nama_ortu" class="form-control" required>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label">Tanggal Baptisan</label>
-                    <input type="date" name="tanggal_baptisan" class="form-control" required>
-                </div>
 
             @elseif ($jenis === 'sidi')
                 <div class="mb-3">
@@ -99,8 +95,8 @@
                     <input type="text" name="nama" class="form-control" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Tanggal Sidi</label>
-                    <input type="date" name="tanggal_sidi" class="form-control" required>
+                    <label class="form-label">Nama Orang Tua</label>
+                    <input type="text" name="nama_ortu" class="form-control" required>
                 </div>
 
             @elseif ($jenis === 'pranikah')
