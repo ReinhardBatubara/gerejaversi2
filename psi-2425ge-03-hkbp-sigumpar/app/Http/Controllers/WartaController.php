@@ -21,7 +21,7 @@ class WartaController extends Controller
         // Ambil warta terbaru (pertama)
         $latestWarta = $wartas->first();
 
-        if ($user->hasRole('user')) {
+        if (!auth()->check() || !auth()->user()->hasRole('admin')) {
             return view('halaman.wartagereja.user.warta', compact('wartas', 'latestWarta'));
         }
 

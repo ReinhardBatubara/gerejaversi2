@@ -14,11 +14,17 @@ class EventController extends Controller
 
     // Menampilkan semua event
     public function events()
-    {
-        $events = Event::latest()->get();
-        // Pastikan mengirim ke view yang benar sesuai struktur folder kamu
+{
+    $events = Event::latest()->get();
+    $user = auth()->user();
+
+    if ($user && $user->role === 'admin') {
         return view('halaman.berandagereja.admin.dashboard', compact('events'));
+    } else {
+        return view('halaman.berandagereja.user.dashboard', compact('events'));
     }
+}
+
 
     // Form tambah event
     public function create()

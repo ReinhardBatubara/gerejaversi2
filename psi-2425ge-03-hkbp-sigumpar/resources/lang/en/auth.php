@@ -16,5 +16,6 @@ return [
     'failed' => 'Email atau password Salah',
     'password' => 'Password yang kamu masukkan salah.',
     'throttle' => 'Terlalu banyak percobaan login. Silakan coba lagi dalam :seconds detik.',
+    'forgot_password' => 'Lupa kata sandi?',
 
 ];

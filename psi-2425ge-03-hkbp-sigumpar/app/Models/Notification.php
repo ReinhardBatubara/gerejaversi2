@@ -16,4 +16,11 @@ class Notification extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Notification.php
+public function layanan()
+{
+    return $this->belongsTo(LayananGereja::class, 'layanan_id');
+}
+
 }

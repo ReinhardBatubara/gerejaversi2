@@ -29,56 +29,45 @@
                     <div class="mb-4">
                         <x-input-label for="tanggal" :value="__('Tanggal')" />
                         <x-text-input id="tanggal" class="block mt-1 w-full" type="date" name="tanggal"
-                            :value="old('tanggal', $congregation->tanggal)" required />
+                            :value="old('tanggal', $congregation->tanggal)" required onchange="updateWeek()" />
                         <x-input-error :messages="$errors->get('tanggal')" class="mt-2" />
                     </div>
 
-                    {{-- Jumlah --}}
+                    {{-- Minggu --}}
                     <div class="mb-4">
-                        <x-input-label for="jumlah" :value="__('Jumlah')" />
-                        <x-text-input id="jumlah" class="block mt-1 w-full" type="number" name="jumlah"
-                            :value="old('jumlah', $congregation->jumlah)" required />
-                        <x-input-error :messages="$errors->get('jumlah')" class="mt-2" />
+                        <x-input-label for="week" :value="__('Minggu')" />
+                        <x-text-input id="week" class="block mt-1 w-full" type="number" name="week"
+                            :value="old('week', $congregation->week)" readonly required />
+                        <x-input-error :messages="$errors->get('week')" class="mt-2" />
                     </div>
 
-                    {{-- Gender --}}
+                    {{-- Jumlah Jemaat per Kategori Usia --}}
                     <div class="mb-4">
-                        <x-input-label for="gender" :value="__('Gender')" />
-                        <select id="gender" name="gender"
-                            class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                            required>
-                            <option value="">Pilih Gender</option>
-                            <option value="Laki-laki"
-                                {{ old('gender', $congregation->gender) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki
-                            </option>
-                            <option value="Perempuan"
-                                {{ old('gender', $congregation->gender) == 'Perempuan' ? 'selected' : '' }}>Perempuan
-                            </option>
-                        </select>
-                        <x-input-error :messages="$errors->get('gender')" class="mt-2" />
+                        <x-input-label for="jumlah_anak" :value="__('Jumlah Anak-anak')" />
+                        <x-text-input id="jumlah_anak" class="block mt-1 w-full" type="number" name="jumlah_anak"
+                            :value="old('jumlah_anak', $congregation->jumlah_anak)" required />
+                        <x-input-error :messages="$errors->get('jumlah_anak')" class="mt-2" />
                     </div>
 
-                    {{-- Kategori Usia --}}
                     <div class="mb-4">
-                        <x-input-label for="age_categories" :value="__('Kategori Usia')" />
-                        <select id="age_categories" name="age_categories"
-                            class="block mt-1 w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                            required>
-                            <option value="">Pilih Kategori Usia</option>
-                            <option value="Anak-anak"
-                                {{ old('age_categories', $congregation->age_categories) == 'Anak-anak' ? 'selected' : '' }}>
-                                Anak-anak</option>
-                            <option value="Remaja"
-                                {{ old('age_categories', $congregation->age_categories) == 'Remaja' ? 'selected' : '' }}>
-                                Remaja</option>
-                            <option value="Dewasa"
-                                {{ old('age_categories', $congregation->age_categories) == 'Dewasa' ? 'selected' : '' }}>
-                                Dewasa</option>
-                            <option value="Lansia"
-                                {{ old('age_categories', $congregation->age_categories) == 'Lansia' ? 'selected' : '' }}>
-                                Lansia</option>
-                        </select>
-                        <x-input-error :messages="$errors->get('age_categories')" class="mt-2" />
+                        <x-input-label for="jumlah_remaja" :value="__('Jumlah Remaja')" />
+                        <x-text-input id="jumlah_remaja" class="block mt-1 w-full" type="number" name="jumlah_remaja"
+                            :value="old('jumlah_remaja', $congregation->jumlah_remaja)" required />
+                        <x-input-error :messages="$errors->get('jumlah_remaja')" class="mt-2" />
+                    </div>
+
+                    <div class="mb-4">
+                        <x-input-label for="jumlah_dewasa" :value="__('Jumlah Dewasa')" />
+                        <x-text-input id="jumlah_dewasa" class="block mt-1 w-full" type="number" name="jumlah_dewasa"
+                            :value="old('jumlah_dewasa', $congregation->jumlah_dewasa)" required />
+                        <x-input-error :messages="$errors->get('jumlah_dewasa')" class="mt-2" />
+                    </div>
+
+                    <div class="mb-4">
+                        <x-input-label for="jumlah_lansia" :value="__('Jumlah Lansia')" />
+                        <x-text-input id="jumlah_lansia" class="block mt-1 w-full" type="number" name="jumlah_lansia"
+                            :value="old('jumlah_lansia', $congregation->jumlah_lansia)" required />
+                        <x-input-error :messages="$errors->get('jumlah_lansia')" class="mt-2" />
                     </div>
 
                     {{-- Submit --}}
@@ -93,4 +82,23 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // Function to update the week based on the selected date
+        function updateWeek() {
+            const dateInput = document.getElementById('tanggal').value;
+            if (dateInput) {
+                const date = new Date(dateInput);
+                const weekNumber = getWeekNumber(date);
+                document.getElementById('week').value = weekNumber;
+            }
+        }
+
+        // Function to get the week number from a given date
+        function getWeekNumber(date) {
+            const startDate = new Date(date.getFullYear(), 0, 1);
+            const days = Math.floor((date - startDate) / (24 * 60 * 60 * 1000));
+            return Math.ceil((days + startDate.getDay() + 1) / 7);
+        }
+    </script>
 </x-app-layout>

@@ -10,6 +10,10 @@
         @else
             <ul>
                 @foreach($notifications as $notification)
+                    @php
+                        $layanan = $notification->layanan;
+                        $status = $layanan ? $layanan->status : 'menunggu';
+                    @endphp
                     <li class="mb-4 p-4 border rounded {{ $notification->is_read ? 'bg-gray-100' : 'bg-blue-100' }}">
                         <div class="flex justify-between items-center">
                             <div>
@@ -20,10 +24,10 @@
                                 <!-- Jika ada file, tampilkan link download -->
                                 @if ($notification->files)
                                     @php
-                                        $files = json_decode($notification->files, true); 
+                                        $files = json_decode($notification->files, true);
                                     @endphp
                                     @foreach ($files as $key => $file)
-                                        @if(strpos($key, 'surat_') !== false && $file)
+                                        @if (strpos($key, 'surat_') !== false && $file)
                                             <div class="mt-2">
                                                 <a href="{{ Storage::url($file) }}" target="_blank" class="inline-block px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md">
                                                     Download {{ ucfirst(str_replace('_', ' ', $key)) }}
@@ -34,13 +38,10 @@
                                 @endif
                             </div>
 
-                            <div>
+                            <div class="flex items-center space-x-2">
                                 {{-- Status layanan --}}
-                                <p>Status: 
-                                    @php
-                                        $status = $notification->status ?? 'menunggu'; // default menunggu kalau belum ada status
-                                    @endphp
-
+                                <p class="text-sm mr-4">
+                                    Status:
                                     @if ($status == 'menunggu')
                                         <span class="text-yellow-600 font-semibold">Menunggu</span>
                                     @elseif ($status == 'diterima')
@@ -52,21 +53,26 @@
                                     @endif
                                 </p>
 
-                                @if ($status == 'menunggu')
-                                    {{-- Tombol Terima --}}
-                                    <form action="{{ route('layanan.updateStatus', $notification->id) }}" method="POST" style="display:inline-block;">
+                                @if ($layanan && $status == 'menunggu')
+                                    <form action="{{ route('layanan.updateStatus', $layanan->id) }}" method="POST" style="display:inline-block;">
                                         @csrf
                                         <input type="hidden" name="status" value="diterima">
                                         <button type="submit" class="text-sm text-green-600 hover:underline">Terima</button>
                                     </form>
 
-                                    {{-- Tombol Tolak --}}
-                                    <form action="{{ route('layanan.updateStatus', $notification->id) }}" method="POST" style="display:inline-block; margin-left:10px;">
+                                    <form action="{{ route('layanan.updateStatus', $layanan->id) }}" method="POST" style="display:inline-block; margin-left:10px;">
                                         @csrf
                                         <input type="hidden" name="status" value="ditolak">
                                         <button type="submit" class="text-sm text-red-600 hover:underline">Tolak</button>
                                     </form>
                                 @endif
+
+                                {{-- Tombol Hapus Notifikasi --}}
+                                <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pemberitahuan ini?');" style="display:inline-block; margin-left:10px;">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-sm text-red-600 hover:underline">Hapus</button>
+                                </form>
                             </div>
                         </div>
                     </li>

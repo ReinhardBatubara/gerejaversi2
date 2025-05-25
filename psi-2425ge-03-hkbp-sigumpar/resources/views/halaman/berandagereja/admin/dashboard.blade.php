@@ -2,7 +2,6 @@
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-
             {{ __('Dashboard') }}
         </h2>
     </x-slot>
@@ -54,7 +53,7 @@
 
         <!-- Upcoming Events with CRUD -->
         <section class="upcoming-event">
-            <h2>Upcoming Events</h2>
+            <h2 class="upcoming-title">Upcoming Events</h2>
 
             <a href="{{ route('admin.events.create') }}" class="btn btn-primary mb-4">Tambah Event Baru</a>
 
@@ -73,30 +72,21 @@
                             <div class="info">
                                 <h3>{{ $event->title }}</h3>
                                 <p>{{ Str::limit($event->description, 150) }}</p>
-                                <a href="{{ route('admin.events.edit', $event->id) }}"
-                                    class="btn btn-warning btn-sm">Edit</a>
-                                <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST"
-                                    style="display:inline-block;" onsubmit="return confirm('Yakin hapus event ini?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                                </form>
+                                <div class="action-buttons">
+                                    <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-warning btn-sm">Edit</a>
+                                    <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST"
+                                        style="display:inline-block;" onsubmit="return confirm('Yakin hapus event ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
 
                 <button class="arrow right" onclick="moveSlide(1)" aria-label="Next">&#10095;</button>
-            </div>
-
-            <div class="indicators" id="indicators" role="tablist" aria-label="Event slide indicators">
-                @foreach ($events as $index => $event)
-                    <span onclick="goToSlide({{ $index }})"
-                        class="dot @if ($index == 0) active @endif" role="tab" tabindex="0"
-                        aria-selected="{{ $index == 0 ? 'true' : 'false' }}" aria-controls="slide{{ $index + 1 }}"
-                        aria-label="Go to slide {{ $index + 1 }}">
-                    </span>
-                @endforeach
             </div>
         </section>
     </div>
@@ -110,10 +100,6 @@
             cards.forEach((card, i) => {
                 card.classList.toggle('active', i === currentIndex);
             });
-            dots.forEach((dot, i) => {
-                dot.classList.toggle('active', i === currentIndex);
-                dot.setAttribute('aria-selected', i === currentIndex ? 'true' : 'false');
-            });
         }
 
         function moveSlide(step) {
@@ -123,18 +109,12 @@
             updateActiveCard();
         }
 
-        function goToSlide(index) {
-            currentIndex = index;
-            updateActiveCard();
-        }
-
         window.addEventListener('load', () => {
             updateActiveCard();
         });
     </script>
 
     <style>
-        /* Wrapper untuk background dan padding */
         .page-wrapper {
             background-color: #f5f7fa;
             padding: 2rem 1rem 4rem;
@@ -330,6 +310,54 @@
             margin-bottom: 1rem;
         }
 
+        /* Buttons inside carousel cards */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            display: inline-block;
+            text-align: center;
+            border: none;
+            transition: background-color 0.25s ease;
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background-color: #005bbb;
+            color: #fff;
+        }
+
+        .btn-primary:hover {
+            background-color: #004080;
+        }
+
+        .btn-warning {
+            background-color: #f0ad4e;
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            background-color: #d48806;
+        }
+
+        .btn-danger {
+            background-color: #d9534f;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background-color: #a9322f;
+        }
+
         /* Navigation arrows */
         .arrow {
             position: absolute;
@@ -382,47 +410,6 @@
 
         .dot:hover {
             background: #666;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 0.5rem 1.25rem;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            display: inline-block;
-            text-align: center;
-            border: none;
-            transition: background-color 0.25s ease;
-            user-select: none;
-        }
-
-        .btn-primary {
-            background-color: #005bbb;
-            color: #fff;
-        }
-
-        .btn-primary:hover {
-            background-color: #004080;
-        }
-
-        .btn-warning {
-            background-color: #f0ad4e;
-            color: #fff;
-        }
-
-        .btn-warning:hover {
-            background-color: #d48806;
-        }
-
-        .btn-danger {
-            background-color: #d9534f;
-            color: #fff;
-        }
-
-        .btn-danger:hover {
-            background-color: #a9322f;
         }
 
         /* RESPONSIVE */

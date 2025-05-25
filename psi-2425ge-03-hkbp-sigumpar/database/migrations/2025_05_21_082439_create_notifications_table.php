@@ -25,5 +25,11 @@ class CreateNotificationsTable extends Migration
     {
         Schema::dropIfExists('notifications');
     }
+
+    public function layanan()
+{
+    return $this->belongsTo(LayananGereja::class, 'layanan_id');
+}
+
 }
 

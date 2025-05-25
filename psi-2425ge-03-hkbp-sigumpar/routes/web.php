@@ -15,19 +15,20 @@ use Illuminate\Support\Facades\Route;
 
 // Public Routes (No login required)
 Route::get('/', [EventController::class, 'events'])->name('dashboard');  // Dashboard is accessible without login
-Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal');
+Route::get('/jadwal', [JadwalController::class, 'index'])->name('jadwal.index');
+Route::post('/jadwal/update-massal', [JadwalController::class, 'updateMassal'])->name('jadwal.updateMassal');
 Route::get('/warta', [WartaController::class, 'index'])->name('warta.index');
 Route::view('/profilegereja', 'halaman.profilegereja.admin.profilegereja')->name('profilegereja');
+Route::get('/dashboard', [EventController::class, 'events'])->name('dashboard'); 
 
 // Authenticated routes with verification middleware
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    // Static views
-    Route::view('/profilegereja', 'halaman.profilegereja.admin.profilegereja')->name('profilegereja');
-
+    
     // Mass update and resource route for Jadwal
     Route::put('/jadwal/mass-update', [JadwalController::class, 'massUpdate'])->name('jadwal.massUpdate');
-    Route::resource('jadwal', JadwalController::class)->middleware('role:admin|user');
+    // resource jadwal kecuali index
+    Route::resource('jadwal', JadwalController::class)->except(['index']);
 
     // Layanan Gereja route
     Route::get('/layanan', [LayananGerejaController::class, 'index'])->name('layanan');
@@ -40,8 +41,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/layanangereja', [LayananGerejaController::class, 'index'])->name('layanangereja.index');
     Route::get('/layanangereja/create', [LayananGerejaController::class, 'create'])->name('layanangereja.create');
     Route::post('/layanangereja', [LayananGerejaController::class, 'store'])->name('layanangereja.store');
-    Route::post('/layanan/{id}/status', [LayananGerejaController::class, 'updateStatus'])->name('layanan.updateStatus');
-
+    Route::post('/layanan/{id}/update-status', [LayananGerejaController::class, 'updateStatus'])->name('layanan.updateStatus');
+    Route::post('/layanan/{kode}/toggle-status', [LayananGerejaController::class, 'toggleStatus'])->name('layanan.toggleStatus');
+    
     // Congregations resource with admin role middleware on specific routes
     Route::resource('congregations', CongregationController::class)->except(['show']);
     Route::get('/admin/congregations', [CongregationController::class, 'index'])
@@ -54,8 +56,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('congregations.statistics')->middleware('role:admin');
 
     // Warta and Jadwal resources with role middleware
-    Route::resource('warta', WartaController::class)->middleware('role:admin');
-    Route::resource('jadwal', JadwalController::class)->middleware('role:admin|user');
+    Route::resource('warta', WartaController::class)->except(['index']);
 });
 
 // Profile management routes (auth required)
@@ -77,3 +78,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::resource('events', EventController::class);
 });
 
+Route::middleware(['auth'])->group(function () {
+    Route::delete('/notifications/{id}', [NotificationController::class, 'destroy'])->name('notifications.destroy');
+});

@@ -5,15 +5,7 @@
         </h2>
     </x-slot>
 
-    <!-- <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
-                </div>
-            </div>
-        </div>
-    </div> -->
+    
 
     <!DOCTYPE html>
 <html lang="id">
@@ -27,21 +19,27 @@
 
   <main>
     <section class="section">
-        <div class="bg-circle-mid"></div> <!-- Tambahan lingkaran tengah bawah -->
+  <div class="bg-circle-mid"></div> <!-- Tambahan lingkaran tengah bawah -->
 
-        <div class="content-container">
-          <div class="content">
-            <h2>Sejarah Gereja</h2>
-            <p>Dr. Ingwer Ludwig Nommensen adalah misionaris Jerman yang menyebarkan agama Kristen di Tanah Batak dan menjadi ephorus pertama HKBP. Ia lahir pada 6 Februari 1834 di Nordstrand, Jerman, dan wafat di Sigumpar, Toba Samosir, pada 23 Mei 1918. Napak tilas perjalanan Nommensen menjadi bagian dari peringatan Jubileum 150 tahun HKBP. Rombongan napak tilas mengunjungi makam Nommensen di Sigumpar, yang menjadi tujuan wisata rohani.</p>
-            <p>Makamnya dilapisi marmer dengan latar belakang Danau Toba dan berada dalam kompleks bersama keluarga dan rekan-rekan sepelayanan. Meski demikian, akses jalan menuju makam masih kurang memadai. Pemerintah Kabupaten Toba Samosir dan HKBP terus mengelola serta mengembangkan kompleks ini sebagai destinasi wisata rohani. Wisatawan, termasuk keturunan Nommensen dari Jerman, kerap berkunjung untuk menghormati jasanya dalam membebaskan masyarakat Batak dari animisme dan keterbelakangan.</p>
-          </div>
+  <div class="content-container flex flex-col md:flex-row items-center md:items-start gap-8">
+    <div class="content md:w-1/2">
+      <h2 class="text-2xl font-semibold mb-4">Sejarah Gereja</h2>
+      <p class="mb-4">
+        Dr. Ingwer Ludwig Nommensen adalah misionaris Jerman yang menyebarkan agama Kristen di Tanah Batak dan menjadi ephorus pertama HKBP. Ia lahir pada 6 Februari 1834 di Nordstrand, Jerman, dan wafat di Sigumpar, Toba Samosir, pada 23 Mei 1918. Napak tilas perjalanan Nommensen menjadi bagian dari peringatan Jubileum 150 tahun HKBP. Rombongan napak tilas mengunjungi makam Nommensen di Sigumpar, yang menjadi tujuan wisata rohani.
+      </p>
+      <p>
+        Makamnya dilapisi marmer dengan latar belakang Danau Toba dan berada dalam kompleks bersama keluarga dan rekan-rekan sepelayanan. Meski demikian, akses jalan menuju makam masih kurang memadai. Pemerintah Kabupaten Toba Samosir dan HKBP terus mengelola serta mengembangkan kompleks ini sebagai destinasi wisata rohani. Wisatawan, termasuk keturunan Nommensen dari Jerman, kerap berkunjung untuk menghormati jasanya dalam membebaskan masyarakat Batak dari animisme dan keterbelakangan.
+      </p>
+    </div>
 
-          <div class="image-wrapper text-center">
-            <div class="circle-bg"></div>
-            <img src="/images/gereja no background.png" alt="Gereja HKBP Sigumpar" class="rounded shadow church-image">
-          </div>
-        </div>
-      </section>
+    <div class="image-wrapper text-center md:w-1/2 relative">
+      <div class="circle-bg absolute inset-0 rounded-full bg-gray-100"></div>
+      <img src="/images/hkbp sigumpar.jpg" alt="Gereja HKBP Sigumpar"
+           class="relative rounded-full shadow-lg object-cover w-80 h-80 mx-auto border-4 border-gray-300" />
+    </div>
+  </div>
+</section>
+
 
       <section class="wave-section">
         <div class="content-container">

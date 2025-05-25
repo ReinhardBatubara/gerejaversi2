@@ -6,7 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\LayananGereja;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Notification;
-use Illuminate\Support\Facades\Auth; // <-- wajib import ini
+use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class LayananGerejaController extends Controller
 {
@@ -25,7 +26,13 @@ class LayananGerejaController extends Controller
             ['kode' => 'pemesanan_gedung', 'nama' => 'Pemesanan Gedung', 'status' => true],
         ];
 
-        return view('halaman.layanangereja.admin.layanan', compact('layanans'));
+        $user = auth()->user();
+
+        if ($user && $user->role === 'admin') {
+            return view('halaman.layanangereja.admin.layanan', compact('layanans'));
+        } else {
+            return view('halaman.layanangereja.user.layanan', compact('layanans'));
+        }
     }
 
     // Tampilkan form sesuai layanan yang dipilih
@@ -37,9 +44,13 @@ class LayananGerejaController extends Controller
             return redirect()->route('layanangereja.index')->with('error', 'Pilih layanan terlebih dahulu.');
         }
 
-        // Bisa buat validasi jenis layanan apakah valid
+        $user = auth()->user();
 
-        return view('halaman.layanangereja.admin.layanan_form', compact('jenis'));
+        if ($user && $user->role === 'admin') {
+            return view('halaman.layanangereja.admin.layanan_form', compact('jenis'));
+        } else {
+            return view('halaman.layanangereja.user.layanan_form', compact('jenis'));
+        }
     }
 
     // Simpan data layanan dari form
@@ -47,77 +58,183 @@ class LayananGerejaController extends Controller
     {
         $jenis = $request->input('jenis_layanan');
 
-        // Validasi umum
+        $user = auth()->user();
+
+        // Validasi umum, termasuk validasi jenis layanan wajib ada dan harus valid
         $rules = [
-            'nama_jemaat' => 'required|string|max:255',
-            'no_telepon' => 'nullable|string|max:20',
-            'alamat' => 'nullable|string|max:255',
-            'tanggal_layanan' => 'nullable|date|after_or_equal:today',
+            'jenis_layanan' => 'required|string|in:martuppol,pernikahan,jemaat_sakit,jemaat_meninggal,pemesanan_gedung,naik_sidi,baptis,anak_lahir,kunjungan_makam',
         ];
 
-        // Validasi dokumen dan ketentuan sesuai jenis layanan
+        // Validasi khusus berdasarkan jenis layanan
         switch ($jenis) {
-            case 'baptis':
-                $rules['surat_keterangan_warga'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['surat_nikah'] = 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                break;
-            case 'naik_sidi':
-                $rules['surat_keterangan_warga'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['surat_baptis'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['akta'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                break;
             case 'martuppol':
-                $rules['surat_keterangan_warga'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['surat_baptis'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['surat_naik_sidi'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
+                $rules = array_merge($rules, [
+                    'nama_jemaat_laki' => 'required|string|max:255',
+                    'nama_jemaat_perempuan' => 'required|string|max:255',
+                    'alamat_laki' => 'required|string|max:255',
+                    'alamat_perempuan' => 'required|string|max:255',
+                    'no_telepon_laki' => 'required|string|max:20',
+                    'no_telepon_perempuan' => 'required|string|max:20',
+                    'surat_keterangan_warga' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_baptis_laki' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_baptis_perempuan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_naik_sidi_laki' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_naik_sidi_perempuan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'lingkungan_laki' => 'required|string|max:255',
+                    'lingkungan_perempuan' => 'required|string|max:255',
+                    'tanggal_layanan' => 'required|date',
+                ]);
                 break;
+
             case 'pernikahan':
-                $rules['surat_martuppol'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['surat_baptis'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
-                $rules['surat_naik_sidi'] = 'required|file|mimes:pdf,jpg,jpeg,png|max:2048';
+                $rules = array_merge($rules, [
+                    'nama_jemaat_laki' => 'required|string|max:255',
+                    'nama_jemaat_perempuan' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon_laki' => 'required|string|max:20',
+                    'no_telepon_perempuan' => 'required|string|max:20',
+                    'surat_martuppol' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_baptis_laki' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_baptis_perempuan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_naik_sidi_laki' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_naik_sidi_perempuan' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'lingkungan_laki' => 'required|string|max:255',
+                    'lingkungan_perempuan' => 'required|string|max:255',
+                    'tanggal_layanan' => 'required|date',
+                    'dokumen_pranikah' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                ]);
                 break;
+
             case 'jemaat_sakit':
-                $rules['wijk'] = 'required|string|max:255'; // ganti keterangan penyakit
+                $rules = array_merge($rules, [
+                    'nama_jemaat' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'umur' => 'required|integer|min:0',
+                    'lingkungan' => 'required|string|max:255',
+                    'tanggal_layanan' => 'required|date',
+                ]);
                 break;
+
             case 'jemaat_meninggal':
-                $rules['lingkungan'] = 'required|string|max:255';
-                $rules['tanggal_layanan'] = 'required|date|after_or_equal:today';
+                $rules = array_merge($rules, [
+                    'nama_jemaat' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'umur' => 'required|integer|min:0',
+                    'lingkungan' => 'required|string|max:255',
+                    'tanggal_layanan' => 'required|date',
+                ]);
                 break;
+
+            case 'pemesanan_gedung':
+                $rules = array_merge($rules, [
+                    'nama_jemaat' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'tanggal_layanan' => 'required|date',
+                    'keterangan' => 'nullable|string',
+                    'lingkungan' => 'nullable|string|max:255',
+                ]);
+                break;
+
+            case 'naik_sidi':
+                $rules = array_merge($rules, [
+                    'nama_jemaat' => 'required|string|max:255',
+                    'nama_ayah' => 'required|string|max:255',
+                    'nama_ibu' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'kartu_keluarga' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_baptis' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'akta_lahir' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_keterangan_warga' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'lingkungan' => 'required|string|max:255',
+                ]);
+                break;
+
+            case 'baptis':
+                $rules = array_merge($rules, [
+                    'nama_jemaat' => 'required|string|max:255',
+                    'nama_ayah' => 'required|string|max:255',
+                    'nama_ibu' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'kartu_keluarga' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_keterangan_warga' => 'required|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'surat_nikah' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'lingkungan' => 'required|string|max:255',
+                ]);
+                break;
+
+            case 'anak_lahir':
+                $rules = array_merge($rules, [
+                    'nama_anak' => 'required|string|max:255',
+                    'nama_ayah' => 'required|string|max:255',
+                    'nama_ibu' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'tanggal_lahir' => 'required|date',
+                    'lingkungan' => 'required|string|max:255',
+                ]);
+                break;
+
+            case 'kunjungan_makam':
+                $rules = array_merge($rules, [
+                    'nama_jemaat' => 'required|string|max:255',
+                    'alamat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                    'tanggal_layanan' => 'required|date',
+                    'keterangan' => 'nullable|string',
+                    'lingkungan' => 'nullable|string|max:255',
+                ]);
+                break;
+
             default:
-                // Aturan lain jika perlu
-                break;
+                return back()->withErrors(['jenis_layanan' => 'Jenis layanan tidak valid']);
         }
 
+        // Jalankan validasi
         $validated = $request->validate($rules);
 
-        $validated['jenis_layanan'] = $jenis;
-        $validated['user_id'] = Auth::id(); // pastikan simpan user_id
+        // Simpan user_id ke data validasi
+        $validated['user_id'] = $user->id;
 
-        // Upload file jika ada
+        // Upload file jika ada dan update path di $validated
         $fileFields = [
             'surat_keterangan_warga',
-            'surat_baptis',
-            'surat_naik_sidi',
-            'surat_martuppol',
-            'akta',
-            'dokumen_pranikah',
+            'surat_baptis_laki', 'surat_baptis_perempuan',
+            'surat_naik_sidi_laki', 'surat_naik_sidi_perempuan',
+            'surat_martuppol', 'akta', 'dokumen_pranikah',
+            'surat_nikah', 'kartu_keluarga', 'akta_lahir',
         ];
-
         foreach ($fileFields as $field) {
             if ($request->hasFile($field)) {
                 $validated[$field] = $request->file($field)->store('dokumen_layanan', 'public');
             }
         }
 
+        // Simpan ke database
         $layanan = LayananGereja::create($validated);
 
-        // Kirim notifikasi ke admin (misalnya user_id 1 admin)
-        Notification::create([
-            'user_id' => 1, // id admin, sesuaikan
-            'title' => 'Layanan Gereja Baru',
-            'message' => "Layanan '{$jenis}' baru dari jemaat: " . $validated['nama_jemaat'],
-            'is_read' => false,
-        ]);
+        // Tentukan target user untuk dikirimi notifikasi
+        if ($user->role === 'admin') {
+            // Jika admin yang submit, kirim ke semua user
+            $users = User::all();
+        } else {
+            // Jika user biasa, kirim hanya ke admin
+            $users = User::where('role', 'admin')->get();
+        }
+
+        foreach ($users as $u) {
+            Notification::create([
+                'user_id' => $u->id,
+                'layanan_id' => $layanan->id,
+                'title' => 'Layanan Gereja Baru',
+                'message' => "Layanan '{$jenis}' baru dari jemaat: " . ($validated['nama_jemaat'] ?? ($validated['nama_jemaat_laki'] ?? 'N/A')),
+                'is_read' => false,
+            ]);
+        }
 
         return redirect()->route('layanangereja.index')->with('success', 'Form layanan berhasil disimpan.');
     }
@@ -125,7 +242,7 @@ class LayananGerejaController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $request->validate([
-            'status' => 'required|in:diterima,ditolak',
+            'status' => 'required|in:menunggu,diterima,ditolak',
         ]);
 
         $layanan = LayananGereja::findOrFail($id);
@@ -134,12 +251,40 @@ class LayananGerejaController extends Controller
 
         // Kirim notifikasi ke user pemohon tentang status update
         Notification::create([
-            'user_id' => $layanan->user_id, // Pastikan user_id pemohon tersimpan di layanan
+            'user_id' => $layanan->user_id,
             'title' => "Status Layanan Anda: " . ucfirst($request->status),
             'message' => "Pengajuan layanan Anda dengan jenis {$layanan->jenis_layanan} telah {$request->status}.",
             'is_read' => false,
         ]);
 
         return redirect()->back()->with('success', 'Status layanan berhasil diperbarui.');
+    }
+
+    public function toggleStatus($kode)
+    {
+        // Data layanan bisa disimpan di session atau database
+        $layanans = session('layanans_statuses', [
+            'martuppol' => true,
+            'naik_sidi' => true,
+            'pernikahan' => true,
+            'baptis' => true,
+            'jemaat_sakit' => true,
+            'jemaat_meninggal' => true,
+            'anak_lahir' => true,
+            'kunjungan_makam' => true,
+            'pemesanan_gedung' => true,
+        ]);
+
+        if (!array_key_exists($kode, $layanans)) {
+            return redirect()->back()->with('error', 'Layanan tidak ditemukan.');
+        }
+
+        // Toggle status layanan
+        $layanans[$kode] = !$layanans[$kode];
+
+        // Simpan kembali ke session
+        session(['layanans_statuses' => $layanans]);
+
+        return redirect()->back()->with('success', "Status layanan '{$kode}' berhasil diubah menjadi " . ($layanans[$kode] ? 'Tersedia' : 'Tidak Tersedia'));
     }
 }
