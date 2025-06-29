@@ -5,53 +5,54 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\LayananGereja;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Notification;
+use App\Models\Pemberitahuan;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class LayananGerejaController extends Controller
 {
     // Menampilkan daftar layanan yang tersedia dan tombol pilih layanan
-    public function index()
-    {
-        $layanans = [
-            ['kode' => 'martuppol', 'nama' => 'Martuppol', 'status' => true],
-            ['kode' => 'naik_sidi', 'nama' => 'Pendaftaran Naik Sidi', 'status' => true],
-            ['kode' => 'pernikahan', 'nama' => 'Pendaftaran Pernikahan', 'status' => true],
-            ['kode' => 'baptis', 'nama' => 'Pendaftaran Baptis', 'status' => true],
-            ['kode' => 'jemaat_sakit', 'nama' => 'Pemberitahuan Jemaat Sakit', 'status' => true],
-            ['kode' => 'anak_lahir', 'nama' => 'Pemberitahuan Anak Lahir', 'status' => true],
-            ['kode' => 'jemaat_meninggal', 'nama' => 'Pemberitahuan Jemaat Meninggal Dunia', 'status' => true],
-            ['kode' => 'kunjungan_makam', 'nama' => 'Pemesanan Kunjungan Makam', 'status' => true],
-            ['kode' => 'pemesanan_gedung', 'nama' => 'Pemesanan Gedung', 'status' => true],
-        ];
+        public function index()
+{
+    // Ambil data layanan dari database
+    $layanans = LayananGereja::whereNotNull('kode')->get();
 
-        $user = auth()->user();
+    $user = auth()->user();
 
-        if ($user && $user->role === 'admin') {
-            return view('halaman.layanangereja.admin.layanan', compact('layanans'));
-        } else {
-            return view('halaman.layanangereja.user.layanan', compact('layanans'));
-        }
+    if ($user && $user->role === 'admin') {
+        return view('halaman.layanangereja.admin.layanan', compact('layanans'));
+    } else {
+        return view('halaman.layanangereja.user.layanan', compact('layanans'));
     }
+}
+
 
     // Tampilkan form sesuai layanan yang dipilih
     public function create(Request $request)
-    {
-        $jenis = $request->query('jenis');
+{
+    $jenis = $request->query('jenis');
 
-        if (! $jenis) {
-            return redirect()->route('layanangereja.index')->with('error', 'Pilih layanan terlebih dahulu.');
-        }
-
-        $user = auth()->user();
-
-        if ($user && $user->role === 'admin') {
-            return view('halaman.layanangereja.admin.layanan_form', compact('jenis'));
-        } else {
-            return view('halaman.layanangereja.user.layanan_form', compact('jenis'));
-        }
+    if (!$jenis) {
+        return redirect()->route('layanangereja.index')->with('error', 'Pilih layanan terlebih dahulu.');
     }
+
+    $layanan = LayananGereja::where('jenis_layanan', $jenis)->first();
+
+    // Cek jika layanan aktif
+    if ($layanan && !$layanan->status_aktif) {
+        return redirect()->route('layanangereja.index')->with('error', 'Layanan ini tidak tersedia untuk pengisian.');
+    }
+
+    $user = auth()->user();
+
+    if ($user && $user->role === 'admin') {
+        return view('halaman.layanangereja.admin.layanan_form', compact('jenis'));
+    } else {
+        return view('halaman.layanangereja.user.layanan_form', compact('jenis'));
+    }
+}
+
+
 
     // Simpan data layanan dari form
     public function store(Request $request)
@@ -59,10 +60,15 @@ class LayananGerejaController extends Controller
         $jenis = $request->input('jenis_layanan');
 
         $user = auth()->user();
+        // Cek apakah layanan aktif
+    $layanan = LayananGereja::where('jenis_layanan', $jenis)->first();
+    if ($layanan && !$layanan->status_aktif) {
+        return redirect()->back()->with('error', 'Layanan ini tidak tersedia untuk pengisian.');
+    }
 
         // Validasi umum, termasuk validasi jenis layanan wajib ada dan harus valid
         $rules = [
-            'jenis_layanan' => 'required|string|in:martuppol,pernikahan,jemaat_sakit,jemaat_meninggal,pemesanan_gedung,naik_sidi,baptis,anak_lahir,kunjungan_makam',
+            'jenis_layanan' => 'required|string|in:martuppol,pernikahan,jemaat_sakit,jemaat_meninggal,pemesanan_gedung,naik_sidi,baptis,anak_lahir,kunjungan_makam,kegiatan_mendatang',
         ];
 
         // Validasi khusus berdasarkan jenis layanan
@@ -190,12 +196,29 @@ class LayananGerejaController extends Controller
                 ]);
                 break;
 
+            case 'kegiatan_mendatang':
+                $rules = array_merge($rules, [
+                    'nama_kegiatan' => 'required|string|max:255',
+                    'detail_acara' => 'required|string|max:1000',
+                    'surat_keterangan_warga' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+                    'tanggal_layanan' => 'required|date',
+                    'alamat' => 'required|string|max:255',
+                    'nama_jemaat' => 'required|string|max:255',
+                    'no_telepon' => 'required|string|max:20',
+                ]);
+                break;
+
             default:
                 return back()->withErrors(['jenis_layanan' => 'Jenis layanan tidak valid']);
         }
 
         // Jalankan validasi
         $validated = $request->validate($rules);
+
+        // Menambahkan kolom 'kode' berdasarkan jenis layanan
+            // Membuat kode layanan yang berbasis jenis layanan dan timestamp unik
+        $validated['kode'] = strtoupper($jenis) . '-' . uniqid(); // Kode berupa jenis layanan + ID unik
+
 
         // Simpan user_id ke data validasi
         $validated['user_id'] = $user->id;
@@ -226,65 +249,59 @@ class LayananGerejaController extends Controller
             $users = User::where('role', 'admin')->get();
         }
 
-        foreach ($users as $u) {
-            Notification::create([
-                'user_id' => $u->id,
-                'layanan_id' => $layanan->id,
-                'title' => 'Layanan Gereja Baru',
-                'message' => "Layanan '{$jenis}' baru dari jemaat: " . ($validated['nama_jemaat'] ?? ($validated['nama_jemaat_laki'] ?? 'N/A')),
-                'is_read' => false,
-            ]);
-        }
-
-        return redirect()->route('layanangereja.index')->with('success', 'Form layanan berhasil disimpan.');
+        return redirect()->route('pemberitahuan')->with('success', 'Form layanan berhasil disimpan.');
     }
 
-    public function updateStatus(Request $request, $id)
-    {
-        $request->validate([
-            'status' => 'required|in:menunggu,diterima,ditolak',
-        ]);
-
-        $layanan = LayananGereja::findOrFail($id);
-        $layanan->status = $request->status;
-        $layanan->save();
-
-        // Kirim notifikasi ke user pemohon tentang status update
-        Notification::create([
-            'user_id' => $layanan->user_id,
-            'title' => "Status Layanan Anda: " . ucfirst($request->status),
-            'message' => "Pengajuan layanan Anda dengan jenis {$layanan->jenis_layanan} telah {$request->status}.",
-            'is_read' => false,
-        ]);
-
-        return redirect()->back()->with('success', 'Status layanan berhasil diperbarui.');
-    }
 
     public function toggleStatus($kode)
-    {
-        // Data layanan bisa disimpan di session atau database
-        $layanans = session('layanans_statuses', [
-            'martuppol' => true,
-            'naik_sidi' => true,
-            'pernikahan' => true,
-            'baptis' => true,
-            'jemaat_sakit' => true,
-            'jemaat_meninggal' => true,
-            'anak_lahir' => true,
-            'kunjungan_makam' => true,
-            'pemesanan_gedung' => true,
-        ]);
+{
+    // Mengambil data layanan berdasarkan kode
+    $layanan = LayananGereja::where('kode', $kode)->first();
 
-        if (!array_key_exists($kode, $layanans)) {
-            return redirect()->back()->with('error', 'Layanan tidak ditemukan.');
-        }
+    if ($layanan) {
+        // Toggle status_aktif (ubah dari true ke false atau sebaliknya)
+        $layanan->status_aktif = !$layanan->status_aktif;
+        $layanan->save(); // Simpan perubahan status ke database
 
-        // Toggle status layanan
-        $layanans[$kode] = !$layanans[$kode];
-
-        // Simpan kembali ke session
-        session(['layanans_statuses' => $layanans]);
-
-        return redirect()->back()->with('success', "Status layanan '{$kode}' berhasil diubah menjadi " . ($layanans[$kode] ? 'Tersedia' : 'Tidak Tersedia'));
+        return redirect()->back()->with('success', 'Status layanan berhasil diubah.');
     }
+
+    return redirect()->back()->with('error', 'Layanan tidak ditemukan.');
+}
+
+public function show($id)
+    {
+        // Ambil data layanan berdasarkan ID
+        $layanan = LayananGereja::findOrFail($id);
+
+        // Kirim data layanan ke view detail
+        return view('halaman.pemberitahuan.admin.detail', compact('layanan'));
+    }
+
+    public function removeFile($id)
+{
+    // Cari layanan berdasarkan ID
+    $layanan = LayananGereja::findOrFail($id);
+
+    // Pastikan hanya admin yang bisa menghapus file
+    if (auth()->user()->role !== 'admin') {
+        abort(403, 'Unauthorized action.');
+    }
+
+    // Cek jika file ada di storage
+    if ($layanan->file_path) {
+        // Hapus file dari storage
+        Storage::disk('public')->delete($layanan->file_path);
+
+        // Reset file_path di database menjadi null
+        $layanan->file_path = null;
+        $layanan->save();
+
+        // Redirect dengan pesan sukses
+        return redirect()->back()->with('success', 'Sertifikat berhasil dihapus.');
+    }
+
+    // Jika tidak ada file untuk dihapus
+    return redirect()->back()->with('error', 'Tidak ada sertifikat untuk dihapus.');
+}
 }

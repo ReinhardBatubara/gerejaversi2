@@ -3,76 +3,81 @@
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">Pemberitahuan</h2>
     </x-slot>
 
-    <div class="py-6 max-w-3xl mx-auto sm:px-6 lg:px-8">
-
-        @if($notifications->isEmpty())
-            <p class="text-gray-600">Belum ada pemberitahuan.</p>
-        @else
-            <ul>
-                @foreach($notifications as $notification)
-                    @php
-                        $layanan = $notification->layanan;
-                        $status = $layanan ? $layanan->status : 'menunggu';
-                    @endphp
-                    <li class="mb-4 p-4 border rounded {{ $notification->is_read ? 'bg-gray-100' : 'bg-blue-100' }}">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <strong>{{ $notification->title }}</strong>
-                                <p>{{ $notification->message }}</p>
-                                <small class="text-gray-600">{{ $notification->created_at->diffForHumans() }}</small>
-
-                                <!-- Jika ada file, tampilkan link download -->
-                                @if ($notification->files)
-                                    @php
-                                        $files = json_decode($notification->files, true);
-                                    @endphp
-                                    @foreach ($files as $key => $file)
-                                        @if (strpos($key, 'surat_') !== false && $file)
-                                            <div class="mt-2">
-                                                <a href="{{ Storage::url($file) }}" target="_blank" class="inline-block px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md">
-                                                    Download {{ ucfirst(str_replace('_', ' ', $key)) }}
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                @endif
-                            </div>
-
-                            <div class="flex items-center space-x-2">
-                                {{-- Status layanan --}}
-                                <p class="text-sm mr-4">
-                                    Status:
-                                    @if ($status == 'menunggu')
-                                        <span class="text-yellow-600 font-semibold">Menunggu</span>
-                                    @elseif ($status == 'diterima')
-                                        <span class="text-green-600 font-semibold">Diterima</span>
-                                    @elseif ($status == 'ditolak')
-                                        <span class="text-red-600 font-semibold">Ditolak</span>
-                                    @else
-                                        <span>{{ ucfirst($status) }}</span>
-                                    @endif
-                                </p>
-
-                                @if ($layanan && $status == 'menunggu')
-                                    <form action="{{ route('layanan.updateStatus', $layanan->id) }}" method="POST" style="display:inline-block;">
-                                        @csrf
-                                        <input type="hidden" name="status" value="diterima">
-                                        <button type="submit" class="text-sm text-green-600 hover:underline">Terima</button>
-                                    </form>
-
-                                    <form action="{{ route('layanan.updateStatus', $layanan->id) }}" method="POST" style="display:inline-block; margin-left:10px;">
-                                        @csrf
-                                        <input type="hidden" name="status" value="ditolak">
-                                        <button type="submit" class="text-sm text-red-600 hover:underline">Tolak</button>
-                                    </form>
-                                @endif
-
-                                
-                            </div>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
+    <div class="py-6 max-w-5xl mx-auto sm:px-6 lg:px-8">
+        @if(session('success'))
+            <div class="mb-4 p-4 bg-green-200 text-green-800 rounded">
+                {{ session('success') }}
+            </div>
         @endif
+
+        <h3 class="text-lg font-semibold mb-4">Pemberitahuan</h3>
+
+        <div class="grid grid-cols-1 gap-6">
+            @foreach ($layanans as $layanan)
+                <div class="border p-6 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 bg-white relative">
+                    <div class="font-semibold text-xl text-blue-600">
+                        {{ $layanan['jenis_layanan'] }}
+                    </div>
+
+                    <!-- Menampilkan pengirim (username) di samping jenis layanan -->
+                    <div class="text-sm text-gray-600">
+                        Dikirim oleh: 
+                        @if ($layanan->user_id)
+                            {{ $layanan->user->full_name}}
+                        @else
+                            Pengirim tidak ditemukan
+                        @endif
+                    </div>
+
+                    <!-- Status, diposisikan di kanan atas (Hanya tampil jika bukan admin) -->
+                    @if($layanan->user_id !== 1)
+                        <p class="absolute top-4 right-4 text-gray-600">{{ $layanan['status'] }}</p>
+                    @endif
+
+                    <!-- Alasan penolakan (terlihat hanya jika status 'Ditolak' dan user bukan admin) -->
+                    @if($layanan->user_id !== 1)
+                        <div id="alasan_{{ $layanan->id }}" class="mt-4" style="display: {{ $layanan['status'] == 'Ditolak' ? 'block' : 'none' }}">
+                            <!-- Menampilkan alasan penolakan jika ada -->
+                            @if ($layanan->alasan)
+                                <p class="text-gray-800">Alasan Penolakan:</p>
+                                <p class="border p-4 rounded-lg bg-gray-100">{{ $layanan->alasan }}</p>
+                            @else
+                                <p class="text-gray-800">Tidak ada alasan penolakan yang tersedia.</p>
+                            @endif
+                        </div>
+                    @endif
+
+                    @if ($layanan->file_path && $layanan->status === 'Selesai')
+                        <div class="flex items-center justify-between mt-4 absolute top-7 right-4">
+                            <p class="border p-4 rounded-lg bg-gray-100">{{ $layanan->alasan }}</p>
+                        </div>
+                    @endif
+
+                    <!-- Tampilkan File Sertifikat jika ada -->
+                    @if ($layanan->file_path && $layanan->status === 'Selesai')
+                        <div class="flex items-center justify-between mt-4 absolute bottom-4 right-4">
+                            <a href="{{ Storage::url($layanan->file_path) }}" target="_blank" class="text-sm text-blue-600 hover:underline">Lihat File Disini</a>
+                        </div>
+                    @endif
+
+
+                    <!-- Tombol Lihat Detail -->
+                    <a href="{{ route('layanangereja.show', $layanan->id) }}" 
+                       class="mt-4 inline-block bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition-all duration-300">
+                        Lihat Detail
+                    </a>
+
+                    {{-- Tombol Hapus Notifikasi --}}
+                    @if($layanan->user_id !== 1)
+                        <form action="{{ route('pemberitahuan.destroy', $layanan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pemberitahuan ini?');" style="display:inline-block; margin-left:10px;">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-sm text-red-600 hover:underline">Hapus</button>
+                        </form>
+                    @endif
+
+                </div>
+            @endforeach
+        </div>
     </div>
 </x-app-layout>

@@ -1,86 +1,157 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Models\DataJemaat;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
-class DatajemaatController extends Controller
+class DataJemaatController extends Controller
 {
+    // Menampilkan data jemaat dengan filter tanggal
     public function index(Request $request)
     {
-        $query = DataJemaat::query();
+        // $query = DataJemaat::query();
+        $query = DataJemaat::orderBy('tanggal');
 
-        if ($request->has('tanggal')) {
-            $query->whereDate('tanggal', $request->tanggal);
+        // Filter berdasarkan rentang tanggal jika ada
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        if ($startDate && $endDate) {
+            $query->whereBetween('tanggal', [$startDate, $endDate]);
+        } else {
+            $currentWeek = Carbon::now()->weekOfYear;
+            $query->whereIn('week', [$currentWeek, $currentWeek - 1, $currentWeek - 2, $currentWeek - 3]);
         }
 
-        $datajemaat = $query->get();
-        return view('halaman.datajemaat.index', compact('datajemaat'));
+        // Mengambil semua data jemaat tanpa filter tanggal
+        $dataJemaat = DataJemaat::orderBy('tanggal')->limit(4)->get();
+
+
+        // Group by tanggal dan jumlahkan per kategori usia
+        $byDate = $dataJemaat->groupBy('tanggal')->map(function ($group) {
+            return [
+                'anak' => $group->sum('jumlah_anak'),
+                'remaja' => $group->sum('jumlah_remaja'),
+                'dewasa' => $group->sum('jumlah_dewasa'),
+                'lansia' => $group->sum('jumlah_lansia'),
+            ];
+        });
+
+        // Kirim data ke view
+        if (auth()->user() && auth()->user()->role === 'admin') {
+            // Jika pengguna admin, tampilkan view untuk admin
+            return view('halaman.datajemaat.admin.index', compact('dataJemaat', 'byDate', 'startDate', 'endDate'));
+        } 
+        // Jika pengguna biasa, tampilkan view untuk user
+        else {
+            return view('halaman.datajemaat.user.index', compact('dataJemaat', 'byDate', 'startDate', 'endDate'));
+        }
     }
 
+    // Menampilkan form untuk membuat data jemaat
     public function create()
     {
-        return view('halaman.datajemaat.create');
+        return view('halaman.datajemaat.admin.create');
     }
 
+    // Menyimpan data jemaat ke dalam database
     public function store(Request $request)
     {
         $request->validate([
-            'jumlah' => 'required|integer',
-            'jeniskelamin' => 'required|in:Laki-laki,Perempuan',
-            'kategori_usia' => 'required|in:Anak-anak,Remaja,Dewasa,Lansia',
             'tanggal' => 'required|date',
+            'week' => 'required|integer',
+            'jumlah_anak' => 'required|integer',
+            'jumlah_remaja' => 'required|integer',
+            'jumlah_dewasa' => 'required|integer',
+            'jumlah_lansia' => 'required|integer',
         ]);
 
-        Datajemaat::create($request->all());
-        return redirect()->route('halaman.datajemaat.index')->with('success', 'Data berhasil ditambahkan.');
+         // Periksa apakah tanggal sudah ada dalam database
+        if (DataJemaat::where('tanggal', $request->tanggal)->exists()) {
+        // Jika tanggal sudah ada, berikan pesan error
+        return back()->withErrors(['tanggal' => 'Tanggal ini sudah digunakan. Silakan pilih tanggal yang lain.']);
     }
 
-    public function show(Datajemaat $datajemaat)
-    {
-        return view('halaman.datajemaat.index', compact('datajemaat'));
+        // Menentukan minggu berdasarkan tanggal
+        $week = Carbon::parse($request->tanggal)->weekOfYear;
+
+        // Menyimpan data jemaat
+        DataJemaat::create([
+            'tanggal' => $request->tanggal,
+            'week' => $week,
+            'jumlah_anak' => $request->jumlah_anak,
+            'jumlah_remaja' => $request->jumlah_remaja,
+            'jumlah_dewasa' => $request->jumlah_dewasa,
+            'jumlah_lansia' => $request->jumlah_lansia,
+        ]);
+
+        return redirect()->route('datajemaat.index')->with('success', 'Data berhasil ditambahkan.');
     }
 
+    // Menampilkan form untuk mengedit data jemaat
     public function edit($id)
     {
-        $datajemaat = Datajemaat::findOrFail($id);
-        return view('halaman.datajemaat.edit', compact('datajemaat'));
+        $dataJemaat = DataJemaat::findOrFail($id);
+        return view('halaman.datajemaat.admin.edit', compact('dataJemaat'));
     }
 
+    // Memperbarui data jemaat
     public function update(Request $request, $id)
     {
         $request->validate([
-            'jumlah' => 'required|integer|min:1',
-            'jeniskelamin' => 'required|in:Laki-laki,Perempuan',
-            'kategori_usia' => 'required|in:Anak-anak,Remaja,Dewasa,Lansia',
             'tanggal' => 'required|date',
+            'week' => 'required|integer',
+            'jumlah_anak' => 'required|integer',
+            'jumlah_remaja' => 'required|integer',
+            'jumlah_dewasa' => 'required|integer',
+            'jumlah_lansia' => 'required|integer',
         ]);
 
-        $datajemaat = Datajemaat::findOrFail($id);
-        $datajemaat->update($request->all());
+        $dataJemaat = DataJemaat::findOrFail($id);
+        $dataJemaat->update([
+            'tanggal' => $request->tanggal,
+            'week' => $request->week,
+            'jumlah_anak' => $request->jumlah_anak,
+            'jumlah_remaja' => $request->jumlah_remaja,
+            'jumlah_dewasa' => $request->jumlah_dewasa,
+            'jumlah_lansia' => $request->jumlah_lansia,
+        ]);
 
-        return redirect()->route('halaman.datajemaat.index')->with('success', 'Data berhasil diperbarui.');
+        return redirect()->route('datajemaat.index')->with('success', 'Data berhasil diperbarui.');
     }
 
-    public function destroy(Datajemaat $datajemaat)
-    {
-        $datajemaat->delete();
-        return redirect()->route('halaman.datajemaat.index')->with('success', 'Data berhasil dihapus.');
+    // Menghapus data jemaat
+    public function destroy($id)
+{
+    $dataJemaat = DataJemaat::find($id); // Mencari data berdasarkan ID
+
+    if (!$dataJemaat) {
+        return redirect()->route('datajemaat.index')->with('error', 'Data tidak ditemukan.');
     }
 
+    $dataJemaat->delete(); // Menghapus data jemaat berdasarkan ID
+
+    return redirect()->route('datajemaat.index')->with('success', 'Data berhasil dihapus.');
+}
+
+
+    // Menampilkan statistik data jemaat per minggu
     public function statistics()
     {
-        $data = Datajemaat::select('tanggal', 'jeniskelamin', 'kategori_usia', DB::raw('SUM(jumlah) as total'))
-            ->groupBy('tanggal', 'jeniskelamin', 'kategori_usia')
-            ->orderBy('tanggal')
+        $data = DataJemaat::select('week', 'jumlah_anak', 'jumlah_remaja', 'jumlah_dewasa', 'jumlah_lansia')
+            ->orderBy('week')
             ->get();
 
-        $byDate = $data->groupBy('tanggal')->map->sum('total');
-        $byGender = $data->groupBy('jeniskelamin')->map->sum('total');
-        $byAge = $data->groupBy('kategori_usia')->map->sum('total');
+        $byWeek = $data->groupBy('week')->map(function ($group) {
+            return [
+                'anak' => $group->sum('jumlah_anak'),
+                'remaja' => $group->sum('jumlah_remaja'),
+                'dewasa' => $group->sum('jumlah_dewasa'),
+                'lansia' => $group->sum('jumlah_lansia'),
+            ];
+        });
 
-        return view('admin.datajemaat.statistics', compact('byDate', 'byGender', 'byAge'));
+        return view('halaman.datajemaat.statistics', compact('byWeek'));
     }
 }

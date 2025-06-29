@@ -11,38 +11,89 @@ use Illuminate\View\View;
 
 class ProfileController extends Controller
 {
-    /**
-     * Display the user's profile form.
-     */
+    /* ─────────────────────────────────────────
+     |  Tampilkan form edit profil
+     ───────────────────────────────────────── */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
-            'user' => $request->user(),
-        ]);
+        return view('profile.edit', ['user' => $request->user()]);
     }
 
-    /**
-     * Update the user's profile information.
-     */
+    /* ─────────────────────────────────────────
+     |  Simpan perubahan profil
+     ───────────────────────────────────────── */
     public function update(ProfileUpdateRequest $request): RedirectResponse
-    {
-        // Mengisi model user dengan data validasi termasuk 'wa_number'
-        $request->user()->fill($request->validated());
+{
+    $user = $request->user();
 
-        // Jika email berubah, reset verifikasi email
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
-        }
+    /* Ambil data umum (tanpa partner_*)
+    ------------------------------------------------*/
+    $data = $request->only([
+        'name',
+        'email',
+        'wa_number',
+        'age',
+        'location',
+        'full_name',
+        'father_name',
+        'mother_name',
+        'address',
+        'jenis_kelamin',
+    ]);
 
-        // Simpan perubahan user (termasuk wa_number)
-        $request->user()->save();
+    /* Ambil input pasangan
+    ------------------------------------------------*/
+    $partnerName      = $request->input('partner_name');
+    $partnerWa        = $request->input('partner_wa');
+    $partnerAddress   = $request->input('partner_address');
+    $partnerAge       = $request->input('partner_age');
+    $partnerLocation  = $request->input('partner_location');
 
-        return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    /* Simpan ke field pasangan sesuai jenis kelamin
+    ------------------------------------------------*/
+    if ($request->input('jenis_kelamin') === 'laki-laki') {
+        $data['wife_name']         = $partnerName;
+        $data['wife_wa']           = $partnerWa;
+        $data['wife_address']      = $partnerAddress;
+        $data['wife_age']          = $partnerAge;
+        $data['wife_location']     = $partnerLocation;
+
+        $data['husband_name']      = null;
+        $data['husband_wa']        = null;
+        $data['husband_address']   = null;
+        $data['husband_age']       = null;
+        $data['husband_location']  = null;
+    } elseif ($request->input('jenis_kelamin') === 'perempuan') {
+        $data['husband_name']      = $partnerName;
+        $data['husband_wa']        = $partnerWa;
+        $data['husband_address']   = $partnerAddress;
+        $data['husband_age']       = $partnerAge;
+        $data['husband_location']  = $partnerLocation;
+
+        $data['wife_name']         = null;
+        $data['wife_wa']           = null;
+        $data['wife_address']      = null;
+        $data['wife_age']          = null;
+        $data['wife_location']     = null;
     }
 
-    /**
-     * Delete the user's account.
-     */
+    /* Reset email verifikasi jika email berubah
+    ------------------------------------------------*/
+    if ($user->email !== $data['email']) {
+        $data['email_verified_at'] = null;
+    }
+
+    /* Simpan perubahan & redirect
+    ------------------------------------------------*/
+    $user->fill($data)->save();
+
+    return Redirect::route('profile.edit')->with('status', 'profile-updated');
+}
+
+
+    /* ─────────────────────────────────────────
+     |  Hapus akun
+     ───────────────────────────────────────── */
     public function destroy(Request $request): RedirectResponse
     {
         $request->validateWithBag('userDeletion', [
@@ -50,9 +101,7 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
-
         Auth::logout();
-
         $user->delete();
 
         $request->session()->invalidate();

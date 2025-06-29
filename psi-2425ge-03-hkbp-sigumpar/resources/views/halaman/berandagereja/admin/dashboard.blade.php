@@ -8,93 +8,111 @@
 
     <div class="page-wrapper">
         <!-- HERO -->
-        <section class="hero">
+        <section class="hero" aria-label="Hero Section">
             <div class="hero-content">
                 <img src="/images/LOGO HKBP.png" alt="Logo HKBP" class="logo" />
                 <p class="church-name">HKBP DR I.L.Nommensen Sigumpar</p>
                 <p class="ayat">
-                    Lalu Ia berkata kepada mereka<br />
-                    <q>“Pergilah ke seluruh dunia, beritakanlah Injil kepada segala makhluk”.</q><br />
+                    <span class="intro">Lalu Ia berkata kepada mereka</span><br />
+                    <q>Pergilah ke seluruh dunia, beritakanlah Injil kepada segala makhluk</q><br />
                     <em>Markus 16:15</em>
                 </p>
                 <h3 class="cta">Jadilah bagian jemaat dalam gereja kami</h3>
             </div>
             <div class="hero-image">
-                <img src="/images/yesus_chiby.jpeg" alt="Jesus Character" />
+                <img src="/images/Yesus_2.jpg" alt="Jesus Character" />
             </div>
         </section>
 
-        <!-- Profil Pendeta -->
-        <section class="pastor-profile">
-            <h2>Profil Pendeta</h2>
-            <div class="profile-container">
-                <div class="photo">
-                    <img src="/images/Pendeta.jpg" alt="Foto Pendeta" />
-                </div>
-                <div class="info">
-                    <h3>Pdt. Jonni D.S.Tambun, S.Th</h3>
-                    <p><strong>Jabatan:</strong> Kepala Pendeta Gereja HKBP DR. IL. Nommensen Sigumpar</p>
-                    <p>
-                        Pdt. Jonni D.S.Tambun, S.Th adalah seorang pendeta berpengalaman yang memimpin komunitas dengan
-                        penuh kasih dan dedikasi. Beliau aktif dalam pelayanan rohani dan pengembangan gereja serta
-                        keterlibatan sosial masyarakat.
-                    </p>
-                </div>
-            </div>
+       <!-- PROFIL PENDETA -->
+<section class="pastor-profile" aria-label="Profil Pendeta">
+    <h2>Profil Pendeta</h2>
+    @if ($profile)
+    <div class="profile-container">
+        <div class="photo">
+            <img src="{{ asset('storage/' . $profile->photo_url) }}" alt="Foto Pendeta {{ $profile->nama }}">
+        </div>
+        <div class="info">
+            <h3>{{ $profile->nama }}</h3>
+            <p><strong>Jabatan:</strong> {{ $profile->posisi }}</p>
+            <p>{{ $profile->deskripsi }}</p>
 
+            <!-- Tombol Edit -->
+            <a href="{{ route('admin.profile-pendeta.edit') }}" 
+               class="btn btn-secondary mt-4"
+               style="display: inline-block; padding: 0.5rem 1rem; background-color: #6c757d; color: white; border-radius: 6px; text-decoration: none;">
+                Edit Profil Pendeta
+            </a>
+        </div>
+    </div>
+    @else
+        <p>Profil pendeta belum tersedia.</p>
+    @endif
+</section>
+
+
+        <!-- LOKASI GEREJA -->
+        <section class="lokasi-gereja" aria-label="Lokasi Gereja">
             <h2>Lokasi Gereja</h2>
+            @if ($location)
             <div class="map-container">
                 <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3981.189042659229!2d99.15482971526766!3d2.3948522523934147!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x302e0059f78cc793%3A0x37e26becd0b5a454!2sGereja%20HKBP%20DR.%20IL.%20Nommensen%20Sigumpar!5e0!3m2!1sid!2sid!4v1684417912345!5m2!1sid!2sid"
+                    src="{{ $location->embed_url }}"
                     width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    referrerpolicy="no-referrer-when-downgrade" title="Peta Lokasi Gereja"></iframe>
             </div>
+            @else
+                <p>Lokasi gereja belum tersedia.</p>
+            @endif
         </section>
 
-        <!-- Upcoming Events with CRUD -->
-        <section class="upcoming-event">
-            <h2 class="upcoming-title">Upcoming Events</h2>
-
-            <a href="{{ route('admin.events.create') }}" class="btn btn-primary mb-4">Tambah Event Baru</a>
+        <!-- DOKUMENTASI KEGIATAN -->
+        <section class="upcoming-event" aria-label="Dokumentasi Kegiatan">
+            <div class="upcoming-header">
+                <h2 class="upcoming-title">Dokumentasi Kegiatan</h2>
+                <a href="{{ route('admin.events.create') }}" class="btn btn-primary mb-4">Tambah Event Baru</a>
+            </div>
 
             @if (session('success'))
                 <div class="alert alert-success mb-4">{{ session('success') }}</div>
             @endif
 
-            <div class="carousel-wrapper">
-                <button class="arrow left" onclick="moveSlide(-1)" aria-label="Previous">&#10094;</button>
+            <div class="center-container">
+                <div class="carousel-wrapper">
+                    <button class="arrow left" onclick="moveSlide(-1)" aria-label="Previous">&#10094;</button>
 
-                <div class="carousel" id="carousel">
-                    @foreach ($events as $index => $event)
-                        <div class="card @if ($index == 0) active @endif" role="group"
-                            aria-roledescription="slide" aria-label="Slide {{ $index + 1 }}">
-                            <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}">
-                            <div class="info">
-                                <h3>{{ $event->title }}</h3>
-                                <p>{{ Str::limit($event->description, 150) }}</p>
-                                <div class="action-buttons">
-                                    <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-warning btn-sm">Edit</a>
-                                    <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST"
-                                        style="display:inline-block;" onsubmit="return confirm('Yakin hapus event ini?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-danger btn-sm">Hapus</button>
-                                    </form>
+                    <div class="carousel" id="carousel">
+                        @foreach ($events as $index => $event)
+                            <article class="card @if ($index == 0) active @endif" role="group"
+                                aria-roledescription="slide" aria-label="Slide {{ $index + 1 }}">
+                                <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}">
+                                <div class="info">
+                                    <h3>{{ $event->title }}</h3>
+                                    <p>{{ Str::limit($event->description, 150) }}</p>
+                                    <div class="action-buttons">
+                                        <a href="{{ route('admin.events.edit', $event->id) }}" class="btn btn-warning btn-sm" aria-label="Edit {{ $event->title }}">Edit</a>
+                                        <form action="{{ route('admin.events.destroy', $event->id) }}" method="POST"
+                                            style="display:inline-block;" onsubmit="return confirm('Yakin hapus event ini?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm" aria-label="Hapus {{ $event->title }}">Hapus</button>
+                                        </form>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
+                            </article>
+                        @endforeach
+                    </div>
 
-                <button class="arrow right" onclick="moveSlide(1)" aria-label="Next">&#10095;</button>
+                    <button class="arrow right" onclick="moveSlide(1)" aria-label="Next">&#10095;</button>
+                </div>
             </div>
         </section>
+
     </div>
 
     <script>
         let currentIndex = 0;
         const cards = document.querySelectorAll('.carousel .card');
-        const dots = document.querySelectorAll('.dot');
 
         function updateActiveCard() {
             cards.forEach((card, i) => {
@@ -113,6 +131,7 @@
             updateActiveCard();
         });
     </script>
+
 
     <style>
         .page-wrapper {
@@ -144,16 +163,21 @@
         .logo {
             width: 140px;
             height: auto;
-            margin-bottom: 1rem;
+            margin: 0 auto 1rem auto; /* atas 0, kanan auto, bawah 1rem, kiri auto */
             display: block;
         }
 
+
         .church-name {
-            font-size: 1.6rem;
-            font-weight: 700;
-            color: #003366;
-            margin-bottom: 1rem;
+           font-size: 1.6rem;
+           font-weight: 700;
+           color: #003366;
+           margin-bottom: 1rem;
+           display: block;
+           text-align: center;
+           transform: translateX(20px); /* geser ke kanan 20px */
         }
+
 
         .ayat {
             font-size: 1.1rem;
@@ -161,6 +185,12 @@
             color: #555;
             line-height: 1.6;
             margin-bottom: 1.8rem;
+            margin-left: 20px;
+        }
+        
+        .ayat .intro {
+            display: block;
+            margin-left: 180px; /* Geser ke kanan */
         }
 
         .ayat q {
@@ -169,19 +199,32 @@
             color: #003366;
         }
 
-        .ayat em {
-            display: block;
-            margin-top: 0.5rem;
-            font-weight: 600;
-            color: #666;
-        }
+.ayat em {
+    display: block;
+    margin-left: 220px; /* Geser ke kanan */
+    margin-top: 0.5rem;
+    font-weight: 600;
+    color: #666;
+}
 
-        .cta {
-            font-size: 1.3rem;
-            font-weight: 700;
-            color: #005bbb;
-            cursor: default;
-        }
+.cta {
+    font-size: 1.5rem;
+    font-weight: 600;
+    background: linear-gradient(to right, #003366, #0055aa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin: 30px auto;
+    display: block;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.4s ease-in-out;
+}
+
+.cta:hover {
+    transform: scale(1.05);
+    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
+}
+
 
         .hero-image {
             flex: 1 1 300px;
@@ -198,7 +241,7 @@
 
         /* PROFILE PENDETA */
         .pastor-profile {
-            max-width: 900px;
+            max-width: 1040px;
             margin: 0 auto 3rem auto;
         }
 
@@ -222,8 +265,9 @@
         }
 
         .photo {
-            flex: 1 1 250px;
-            max-width: 250px;
+           flex: 1 1 250px;
+           max-width: 250px;
+           transform: translateX(-20px); /* geser ke kiri 20px */
         }
 
         .photo img {
@@ -258,9 +302,28 @@
             margin-bottom: 3rem;
         }
 
+         .upcoming-header {
+                text-align: center;
+                margin-bottom: 2rem;
+            }
+
+        .upcoming-header h2 {
+                font-size: 2rem;
+                font-weight: bold;
+                color: #003366;
+                margin-bottom: 1rem;
+            }
+
+        .upcoming-header .btn {
+                display: inline-block;
+                margin-top: 0.5rem;
+            }
+
+
         /* CAROUSEL */
         .carousel-wrapper {
             max-width: 900px;
+            width : 100%;
             margin: 0 auto 3rem auto;
             position: relative;
         }

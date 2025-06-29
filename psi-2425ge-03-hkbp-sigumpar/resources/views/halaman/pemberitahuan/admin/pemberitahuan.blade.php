@@ -1,83 +1,127 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">Pemberitahuan</h2>
+        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            Pemberitahuan
+        </h2>
     </x-slot>
 
-    <div class="py-6 max-w-3xl mx-auto sm:px-6 lg:px-8">
-
-        @if($notifications->isEmpty())
-            <p class="text-gray-600">Belum ada pemberitahuan.</p>
-        @else
-            <ul>
-                @foreach($notifications as $notification)
-                    @php
-                        $layanan = $notification->layanan;
-                        $status = $layanan ? $layanan->status : 'menunggu';
-                    @endphp
-                    <li class="mb-4 p-4 border rounded {{ $notification->is_read ? 'bg-gray-100' : 'bg-blue-100' }}">
-                        <div class="flex justify-between items-center">
-                            <div>
-                                <strong>{{ $notification->title }}</strong>
-                                <p>{{ $notification->message }}</p>
-                                <small class="text-gray-600">{{ $notification->created_at->diffForHumans() }}</small>
-
-                                <!-- Jika ada file, tampilkan link download -->
-                                @if ($notification->files)
-                                    @php
-                                        $files = json_decode($notification->files, true);
-                                    @endphp
-                                    @foreach ($files as $key => $file)
-                                        @if (strpos($key, 'surat_') !== false && $file)
-                                            <div class="mt-2">
-                                                <a href="{{ Storage::url($file) }}" target="_blank" class="inline-block px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-md">
-                                                    Download {{ ucfirst(str_replace('_', ' ', $key)) }}
-                                                </a>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                @endif
-                            </div>
-
-                            <div class="flex items-center space-x-2">
-                                {{-- Status layanan --}}
-                                <p class="text-sm mr-4">
-                                    Status:
-                                    @if ($status == 'menunggu')
-                                        <span class="text-yellow-600 font-semibold">Menunggu</span>
-                                    @elseif ($status == 'diterima')
-                                        <span class="text-green-600 font-semibold">Diterima</span>
-                                    @elseif ($status == 'ditolak')
-                                        <span class="text-red-600 font-semibold">Ditolak</span>
-                                    @else
-                                        <span>{{ ucfirst($status) }}</span>
-                                    @endif
-                                </p>
-
-                                @if ($layanan && $status == 'menunggu')
-                                    <form action="{{ route('layanan.updateStatus', $layanan->id) }}" method="POST" style="display:inline-block;">
-                                        @csrf
-                                        <input type="hidden" name="status" value="diterima">
-                                        <button type="submit" class="text-sm text-green-600 hover:underline">Terima</button>
-                                    </form>
-
-                                    <form action="{{ route('layanan.updateStatus', $layanan->id) }}" method="POST" style="display:inline-block; margin-left:10px;">
-                                        @csrf
-                                        <input type="hidden" name="status" value="ditolak">
-                                        <button type="submit" class="text-sm text-red-600 hover:underline">Tolak</button>
-                                    </form>
-                                @endif
-
-                                {{-- Tombol Hapus Notifikasi --}}
-                                <form action="{{ route('notifications.destroy', $notification->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pemberitahuan ini?');" style="display:inline-block; margin-left:10px;">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-sm text-red-600 hover:underline">Hapus</button>
-                                </form>
-                            </div>
-                        </div>
-                    </li>
-                @endforeach
-            </ul>
+    <div class="py-6 max-w-5xl mx-auto sm:px-6 lg:px-8">
+        @if(session('success'))
+            <div class="mb-4 p-4 bg-green-200 text-green-800 rounded">
+                {{ session('success') }}
+            </div>
         @endif
+
+        <h3 class="text-lg font-semibold mb-4">Pemberitahuan</h3>
+
+        <div class="grid grid-cols-1 gap-6">
+            @foreach ($layanans as $layanan)
+                <div class="border p-6 rounded-lg shadow-md bg-white space-y-4">
+                    
+                    <!-- Jenis Layanan -->
+                    <div class="font-semibold text-xl text-blue-600">{{ $layanan['jenis_layanan'] }}</div>
+
+                    <!-- Pengirim -->
+                    <div class="text-sm text-gray-600">
+                        Dikirim oleh:
+                        @if ($layanan->user_id)
+                            {{ $layanan->user->full_name }}
+                        @else
+                            Pengirim tidak ditemukan
+                        @endif
+                    </div>
+
+                    <!-- Form Status & Alasan -->
+                    <form action="{{ route('pemberitahuan.updateStatus', $layanan->id) }}" method="POST" class="space-y-3" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="flex flex-wrap gap-4 items-center mb-4">
+                            <div class="flex items-center gap-3">
+                                <label for="status_{{ $layanan->id }}" class="text-sm font-medium text-gray-700">Status:</label>
+                                <select name="status" id="status_{{ $layanan->id }}" onchange="toggleAlasan('{{ $layanan->id }}'); toggleFileUpload('{{ $layanan->id }}');" class="border rounded-lg px-3 py-2 text-sm bg-white text-gray-800 border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                                    <option value="Diterima" {{ $layanan['status'] == 'Diterima' ? 'selected' : '' }}>Diterima</option>
+                                    <option value="Ditolak" {{ $layanan['status'] == 'Ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                    <option value="Sedang Proses" {{ $layanan['status'] == 'Sedang Proses' ? 'selected' : '' }}>Sedang Proses</option>
+                                    <option value="Selesai" {{ $layanan['status'] == 'Selesai' ? 'selected' : '' }}>Selesai</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="text-sm text-blue-600 hover:underline">Update Status</button>
+                        </div>
+
+                        <div id="alasan_{{ $layanan->id }}" style="display: {{ $layanan['status'] == 'Ditolak' ? 'block' : 'none' }};">
+                            <textarea name="alasan" rows="3" class="border p-2 w-full rounded-lg text-sm mt-1" placeholder="Masukkan alasan penolakan...">{{ old('alasan', $layanan->alasan) }}</textarea>
+                            @error('alasan')
+                                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div id="alasan_{{ $layanan->id }}" style="display: {{ $layanan['status'] == 'Selesai' ? 'block' : 'none' }};">
+                            <textarea name="alasan" rows="3" class="border p-2 w-full rounded-lg text-sm mt-1" placeholder="Masukkan Pemberitahuan">{{ old('alasan', $layanan->alasan) }}</textarea>
+                            @error('alasan')
+                                <p class="text-red-600 text-xs mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <!-- File Upload hanya jika status Selesai -->
+                        <div id="fileUpload_{{ $layanan->id }}" style="display: {{ $layanan['status'] == 'Selesai' ? 'block' : 'none' }};">
+                            <label for="file_{{ $layanan->id }}" class="text-sm font-medium text-gray-700">Unggah File (File PDF):</label>
+                            <input type="file" name="file" id="file_{{ $layanan->id }}" class="form-control" accept="application/pdf">
+                        </div>
+                    </form>
+
+                    <!-- Tampilkan File Sertifikat jika ada -->
+                    @if ($layanan->file_path && $layanan->status === 'Selesai')
+                        <div class="flex items-center justify-between mt-4">
+                            <a href="{{ Storage::url($layanan->file_path) }}" target="_blank" class="text-sm text-blue-600 hover:underline">Lihat File Disini</a>
+                        </div>
+                    @endif
+
+                    <!-- Tombol Hapus Sertifikat -->
+                    <form action="{{ route('layanangereja.removeFile', $layanan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus sertifikat ini?');">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="text-sm text-red-600 hover:underline">Hapus File</button>
+                    </form>
+
+                    <!-- Tombol Aksi -->
+                    <div class="flex items-center gap-4 mt-4">
+                        <a href="{{ route('layanangereja.show', $layanan->id) }}" 
+                           class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm transition-all">
+                            Lihat Detail
+                        </a>
+
+                        <form action="{{ route('pemberitahuan.destroy', $layanan->id) }}" method="POST" onsubmit="return confirm('Yakin ingin menghapus pemberitahuan ini?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="text-sm text-red-600 hover:underline">Hapus</button>
+                        </form>
+                    </div>
+                </div>
+            @endforeach
+        </div>
     </div>
+
+    <!-- Script Toggle Alasan and File Upload -->
+    <script>
+        function toggleAlasan(id) {
+            const status = document.getElementById(`status_${id}`).value;
+            const alasanDiv = document.getElementById(`alasan_${id}`);
+            alasanDiv.style.display = (status === 'Ditolak') ? 'block' : 'none';
+        }
+
+        function toggleFileUpload(id) {
+            const status = document.getElementById(`status_${id}`).value;
+            const fileUploadDiv = document.getElementById(`fileUpload_${id}`);
+            fileUploadDiv.style.display = (status === 'Selesai') ? 'block' : 'none';
+        }
+
+        // Jalankan sekali saat load halaman untuk sync tampilan
+        window.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('select[name="status"]').forEach(select => {
+                toggleAlasan(select.id.split('_')[1]);
+                toggleFileUpload(select.id.split('_')[1]);
+            });
+        });
+    </script>
 </x-app-layout>

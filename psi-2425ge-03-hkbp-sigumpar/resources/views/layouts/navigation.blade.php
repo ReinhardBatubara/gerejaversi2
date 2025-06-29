@@ -24,10 +24,10 @@
                     <x-nav-link :href="route('profilegereja')" :active="request()->routeIs('profilegereja')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
                         {{ __('Profil Gereja') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('jadwal.index')" :active="request()->routeIs('jadwal')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
+                    <x-nav-link :href="route('jadwal')" :active="request()->routeIs('jadwal')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
                         {{ __('Jadwal') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('warta.index')" :active="request()->routeIs('warta')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
+                    <x-nav-link :href="route('warta')" :active="request()->routeIs('warta')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
                         {{ __('Warta') }}
                     </x-nav-link>
                     <x-nav-link :href="route('layanan')" :active="request()->routeIs('layanan')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
@@ -36,11 +36,9 @@
                     <x-nav-link :href="route('pemberitahuan')" :active="request()->routeIs('pemberitahuan')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
                         {{ __('Pemberitahuan') }}
                     </x-nav-link>
-                    @role('admin')
-                        <x-nav-link :href="route('halaman.congregations.index')" :active="request()->routeIs('halaman.congregations.index')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
-                            {{ __('Data Jemaat') }}
-                        </x-nav-link>
-                    @endrole
+                    <x-nav-link :href="route('datajemaat')" :active="request()->routeIs('datajemaat')" class="hover:text-blue-700 transition duration-300 hover:scale-105">
+                        {{ __('Data Jemaat') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -106,10 +104,10 @@
             <x-responsive-nav-link :href="route('profilegereja')" :active="request()->routeIs('profilegereja')">
                 {{ __('Profil Gereja') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('jadwal.index')" :active="request()->routeIs('jadwal')">
+            <x-responsive-nav-link :href="route('jadwal')" :active="request()->routeIs('jadwal')">
                 {{ __('Jadwal') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('warta.index')" :active="request()->routeIs('warta')">
+            <x-responsive-nav-link :href="route('warta')" :active="request()->routeIs('warta')">
                 {{ __('Warta') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('layanan')" :active="request()->routeIs('layanan')">
@@ -118,6 +116,10 @@
             <x-responsive-nav-link :href="route('pemberitahuan')" :active="request()->routeIs('pemberitahuan')">
                 {{ __('Pemberitahuan') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('datajemaat')" :active="request()->routeIs('datajemaat')">
+                {{ __('Data Jemaat') }}
+            </x-responsive-nav-link>
+        
 
             @auth
                 <x-responsive-nav-link :href="route('profile.edit')">

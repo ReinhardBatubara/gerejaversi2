@@ -102,7 +102,7 @@
 </head>
 <body class="page-jadwal">
     <div class="container content-section">
-        <h1 class="welcome-title text-center mb-4">JADWAL IBADAH MINGGU</h1>
+        <h1 class="welcome-title text-center mb-4">JADWAL IBADAH HKBP SIGUMPAR</h1>
         <div class="row justify-content-center align-items-center">
             <div class="col-md-6 mb-4 text-center">
                 <div class="image-wrapper">
@@ -142,164 +142,204 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        // Data jadwal dari backend, sudah dalam format siap pakai
-        let schedulesData = @json($jadwals);
+    // Data jadwal dari backend, sudah dalam format siap pakai
+    let schedulesData = @json($jadwals);
 
-        const languagesOptions = ['', 'Bahasa Indonesia', 'Bahasa Batak Toba', '-'];
+    const languagesOptions = ['', 'Bahasa Indonesia', 'Bahasa Batak Toba'];
 
-        // Render jadwal di tampilan view dengan card menarik
-        function renderViewSchedules() {
-            const container = document.getElementById('viewSchedulesContainer');
-            container.innerHTML = '';
-            schedulesData.forEach((item, i) => {
-                if (!item.enabled) return; // skip yg tidak aktif
-                const div = document.createElement('div');
-                div.className = 'schedule-card';
-                div.id = `view-${i}`;
-                div.innerHTML = `
-                    <div class="schedule-name">${item.nama}</div>
-                    <div class="schedule-time">⏰ ${item.jam_mulai} - ${item.jam_selesai} WIB</div>
-                    <div class="schedule-language">🗣️ ${item.bahasa || '-'}</div>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        // Render form edit jadwal
-        function renderEditSchedules() {
-            const container = document.getElementById('editSchedulesContainer');
-            container.innerHTML = '';
-            schedulesData.forEach((item, i) => {
-                container.appendChild(createScheduleFormBlock(item, i));
-            });
-        }
-
-        // Buat elemen form jadwal
-        function createScheduleFormBlock(schedule, index) {
-            const wrapper = document.createElement('div');
-            wrapper.className = 'mb-4 border rounded p-3 position-relative';
-            wrapper.dataset.index = index;
-
-            // Buat tombol hapus yang jelas bertuliskan "Hapus"
-            const btnRemove = document.createElement('button');
-            btnRemove.type = 'button';
-            btnRemove.className = 'btn btn-danger position-absolute top-0 end-0 mt-2 me-2';
-            btnRemove.title = 'Hapus Jadwal Ini';
-            btnRemove.textContent = 'Hapus';
-
-            btnRemove.addEventListener('click', () => {
-                removeSchedule(index);
-            });
-
-            wrapper.appendChild(btnRemove);
-
-            wrapper.innerHTML += `
-                <input type="hidden" id="id-${index}" value="${schedule.id || ''}" />
-                <div class="mb-3">
-                    <label for="nama-${index}" class="form-label">Nama Jadwal</label>
-                    <input type="text" id="nama-${index}" class="form-control" value="${schedule.nama}" />
-                </div>
-                <h5>${schedule.nama}</h5>
-                <div class="row g-3 align-items-center">
-                    <div class="col-auto"><label for="jam-mulai-${index}" class="col-form-label">Jam Mulai</label></div>
-                    <div class="col-auto"><input type="time" id="jam-mulai-${index}" class="form-control" value="${schedule.jam_mulai}" /></div>
-                    <div class="col-auto"><label for="jam-selesai-${index}" class="col-form-label">Jam Selesai</label></div>
-                    <div class="col-auto"><input type="time" id="jam-selesai-${index}" class="form-control" value="${schedule.jam_selesai}" /></div>
-                    <div class="col-auto"><label for="bahasa-${index}" class="col-form-label">Bahasa</label></div>
-                    <div class="col-auto">
-                        <select id="bahasa-${index}" class="form-select">
-                            ${languagesOptions.map(lang => `<option value="${lang}" ${lang === schedule.bahasa ? 'selected' : ''}>${lang || 'Pilih Bahasa'}</option>`).join('')}
-                        </select>
-                    </div>
-                    <div class="col-auto d-flex align-items-center">
-                        <input type="checkbox" id="enabled-${index}" class="form-check-input me-2" ${schedule.enabled ? 'checked' : ''} />
-                        <label for="enabled-${index}" class="form-check-label mb-0">Enabled</label>
-                    </div>
+    // Render jadwal di tampilan view dengan card menarik
+    function renderViewSchedules() {
+        const container = document.getElementById('viewSchedulesContainer');
+        container.innerHTML = '';
+        schedulesData.forEach((item, i) => { // skip yg tidak aktif
+            const div = document.createElement('div');
+            div.className = 'schedule-card';
+            div.id = `view-${i}`;
+            div.innerHTML = `
+                <div class="schedule-name">${item.nama}</div>
+                <div class="schedule-time">⏰ ${item.jam_mulai} - ${item.jam_selesai} WIB</div>
+                <div class="schedule-language">🗣️ ${item.bahasa || '-'}</div>
+                <div class="text-end mt-2">
+                    <button type="button" class="btn btn-danger btn-remove" onclick="removeSchedule(${i})">Hapus</button>
                 </div>
             `;
+            container.appendChild(div);
+        });
+    }
 
-            return wrapper;
-        }
+    // Render form edit jadwal
+    function renderEditSchedules() {
+        const container = document.getElementById('editSchedulesContainer');
+        container.innerHTML = '';
+        schedulesData.forEach((item, i) => {
+            container.appendChild(createScheduleFormBlock(item, i));
+        });
+    }
 
-        // Toggle view/edit mode
-        function toggleEdit() {
-            const viewBox = document.getElementById('viewBox');
-            const editBox = document.getElementById('editBox');
-            if (editBox.style.display === 'none') {
-                renderEditSchedules();
-                editBox.style.display = 'block';
-                viewBox.style.display = 'none';
-            } else {
-                editBox.style.display = 'none';
-                viewBox.style.display = 'block';
-                resetEditForm();
-            }
-        }
+    // Buat elemen form jadwal dengan tombol hapus (tombol hapus hanya di view)
+    function createScheduleFormBlock(schedule, index) {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'mb-4 border rounded p-3 position-relative';
+        wrapper.dataset.index = index;
 
-        // Tambah jadwal baru di form edit
-        function addSchedule() {
-            schedulesData.push({ id: null, nama: '', jam_mulai: '', jam_selesai: '', bahasa: '', enabled: true });
+        wrapper.innerHTML += `
+            <input type="hidden" id="id-${index}" value="${schedule.id || ''}" />
+            <div class="mb-3">
+                <label for="nama-${index}" class="form-label">Nama Jadwal</label>
+                <input type="text" id="nama-${index}" class="form-control" value="${schedule.nama}" />
+            </div>
+            <h5>${schedule.nama}</h5>
+            <div class="row g-3 align-items-center">
+                <div class="col-auto"><label for="jam-mulai-${index}" class="col-form-label">Jam Mulai</label></div>
+                <div class="col-auto"><input type="time" id="jam-mulai-${index}" class="form-control" value="${schedule.jam_mulai}" /></div>
+                <div class="col-auto"><label for="jam-selesai-${index}" class="col-form-label">Jam Selesai</label></div>
+                <div class="col-auto"><input type="time" id="jam-selesai-${index}" class="form-control" value="${schedule.jam_selesai}" /></div>
+                <div class="col-auto"><label for="bahasa-${index}" class="col-form-label">Bahasa</label></div>
+                <div class="col-auto">
+                    <select id="bahasa-${index}" class="form-select">
+                        ${languagesOptions.map(lang => `<option value="${lang}" ${lang === schedule.bahasa ? 'selected' : ''}>${lang || 'Pilih Bahasa'}</option>`).join('')}
+                    </select>
+                </div>
+            </div>
+        `;
+        return wrapper;
+    }
+
+    // Toggle view/edit mode
+    function toggleEdit() {
+        const viewBox = document.getElementById('viewBox');
+        const editBox = document.getElementById('editBox');
+        if (editBox.style.display === 'none') {
             renderEditSchedules();
+            editBox.style.display = 'block';
+            viewBox.style.display = 'none';
+        } else {
+            editBox.style.display = 'none';
+            viewBox.style.display = 'block';
+            resetEditForm();
         }
+    }
 
-        // Hapus jadwal di form edit
-        function removeSchedule(index) {
+    // Tambah jadwal baru di form edit
+    function addSchedule() {
+        schedulesData.push({ id: null, nama: '', jam_mulai: '', jam_selesai: '', bahasa: '' });
+        renderEditSchedules();
+    }
+
+    // Hapus jadwal di tampilan dengan AJAX ke backend
+    function removeSchedule(index) {
+        const schedule = schedulesData[index];
+        if (schedule.id) {
+            if (confirm(`Yakin hapus jadwal "${schedule.nama}"?`)) {
+                deleteScheduleFromServer(schedule.id)
+                    .then(() => {
+                        schedulesData.splice(index, 1);
+                        renderEditSchedules();
+                        renderViewSchedules();
+                        alert('Jadwal berhasil dihapus');
+                    })
+                    .catch(err => alert('Gagal menghapus jadwal: ' + err.message));
+            }
+        } else {
+            // Jadwal baru, hapus langsung tanpa server call
             schedulesData.splice(index, 1);
             renderEditSchedules();
+            renderViewSchedules();
         }
+    }
 
-        // Reset form edit ke nilai terakhir disimpan (saat batal)
-        function resetEditForm() {
-            renderEditSchedules();
-        }
-
-        // Simpan hasil edit, update view dan data array schedulesData, lalu kirim ke backend
-        function saveEdit() {
-            const count = schedulesData.length;
-            let updatedSchedules = [];
-
-            for(let i = 0; i < count; i++) {
-                const id = document.getElementById(`id-${i}`).value || null;
-                const nama = document.getElementById(`nama-${i}`).value.trim();
-                if (!nama) {
-                    alert(`Nama jadwal ke-${i+1} tidak boleh kosong!`);
-                    document.getElementById(`nama-${i}`).focus();
-                    return;
-                }
-                const jamMulai = document.getElementById(`jam-mulai-${i}`).value;
-                const jamSelesai = document.getElementById(`jam-selesai-${i}`).value;
-                const bahasa = document.getElementById(`bahasa-${i}`).value;
-                const enabled = document.getElementById(`enabled-${i}`).checked;
-
-                updatedSchedules.push({ id, nama, jam_mulai: jamMulai, jam_selesai: jamSelesai, bahasa, enabled });
+    // Fungsi panggil API hapus jadwal
+    function deleteScheduleFromServer(id) {
+        return fetch(`/jadwal/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json',
             }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => { throw new Error(data.message || 'Error hapus jadwal'); });
+            }
+            return response.json();
+        });
+    }
 
-            fetch("{{ route('jadwal.updateMassal') }}", {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({ jadwals: updatedSchedules })
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Gagal menyimpan jadwal');
-                return response.json();
-            })
-            .then(data => {
-                schedulesData = updatedSchedules;
-                renderViewSchedules();
-                toggleEdit();
-                alert(data.message);
-            })
-            .catch(err => {
-                alert(err.message);
-            });
+    // Reset form edit ke nilai terakhir disimpan (saat batal)
+    function resetEditForm() {
+        renderEditSchedules();
+    }
+
+    // Simpan hasil edit, update view dan data array schedulesData, lalu kirim ke backend
+    function saveEdit() {
+    const count = schedulesData.length;
+    let updatedSchedules = [];
+
+    for (let i = 0; i < count; i++) {
+        const id = document.getElementById(`id-${i}`).value || null;
+        const nama = document.getElementById(`nama-${i}`).value.trim();
+        if (!nama) {
+            if(i==0){
+            alert(`Nama jadwal tidak boleh kosong!`);
+            document.getElementById(`nama-${i}`).focus();
+            return;  
+            }else {
+            alert(`Nama jadwal ke-${i + 1} tidak boleh kosong!`);
+            document.getElementById(`nama-${i}`).focus();
+            return;
+            }
         }
 
-        // Render awal view schedules saat load halaman
+        const jamMulai = document.getElementById(`jam-mulai-${i}`).value;
+        const jamSelesai = document.getElementById(`jam-selesai-${i}`).value;
+
+        // Validasi jam mulai dan jam selesai
+        if (jamMulai >= jamSelesai) {
+            if(i==0){
+            alert(`Jam mulai harus lebih kecil dari jam selesai!`);
+            document.getElementById(`jam-mulai-${i}`).focus();
+            return;   
+            }else {
+            alert(`Jam mulai harus lebih kecil dari jam selesai pada jadwal ke-${i + 1}!`);
+            document.getElementById(`jam-mulai-${i}`).focus();
+            return;
+            }
+        }
+
+        const bahasa = document.getElementById(`bahasa-${i}`).value;
+
+        updatedSchedules.push({ id, nama, jam_mulai: jamMulai, jam_selesai: jamSelesai, bahasa });
+    }
+
+    fetch("{{ route('jadwal.updateMassal') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+        },
+        body: JSON.stringify({ jadwals: updatedSchedules })
+    })
+    .then(response => {
+        if (!response.ok) throw new Error('Gagal menyimpan jadwal');
+        return response.json();
+    })
+    .then(data => {
+        schedulesData = updatedSchedules;
         renderViewSchedules();
-    </script>
+        toggleEdit();
+        alert(data.message);
+    })
+    .catch(err => {
+        alert(err.message);
+    });
+}
+
+
+    // Render awal view schedules saat load halaman
+    renderViewSchedules();
+</script>
+
+
 </body>
 </html>
 </x-app-layout>

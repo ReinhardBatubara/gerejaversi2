@@ -1,6 +1,8 @@
 <?php
 
 namespace App\Http\Controllers;
+use App\Models\ProfilePendeta;
+use App\Models\LokasiGereja;
 
 use App\Models\Event;
 use Illuminate\Http\Request;
@@ -18,10 +20,14 @@ class EventController extends Controller
     $events = Event::latest()->get();
     $user = auth()->user();
 
+    // Ambil data profil dan lokasi gereja
+    $profile = ProfilePendeta::first();
+    $location = LokasiGereja::first();
+
     if ($user && $user->role === 'admin') {
-        return view('halaman.berandagereja.admin.dashboard', compact('events'));
+        return view('halaman.berandagereja.admin.dashboard', compact('events', 'profile', 'location'));
     } else {
-        return view('halaman.berandagereja.user.dashboard', compact('events'));
+        return view('halaman.berandagereja.user.dashboard', compact('events', 'profile', 'location'));
     }
 }
 

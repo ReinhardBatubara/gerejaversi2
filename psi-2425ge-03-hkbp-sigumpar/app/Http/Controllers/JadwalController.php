@@ -82,4 +82,21 @@ class JadwalController extends Controller
 
         return response()->json(['message' => 'Jadwal berhasil diperbarui']);
     }
+
+    public function destroy($id)
+{
+    $jadwal = Jadwal::find($id);
+    
+    if (!$jadwal) {
+        // Jika jadwal tidak ditemukan, kembalikan response JSON error
+        return response()->json(['message' => 'Jadwal tidak ditemukan.'], 404);
+    }
+
+    $jadwal->delete();
+
+    // Jika penghapusan berhasil, kembalikan response JSON sukses
+    return response()->json(['message' => 'Jadwal berhasil dihapus.'], 200);
+}
+
+
 }

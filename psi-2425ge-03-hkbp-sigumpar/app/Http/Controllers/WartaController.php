@@ -37,6 +37,11 @@ class WartaController extends Controller
     public function store(Request $request)
     {
         // Validasi input
+        $request->validate([
+            'judul' => 'required|string|max:255',
+            'file_path' => 'nullable|file|mimes:pdf,doc,docx|max:10240', // Accept only PDF and Word files
+        ]);
+        
         DB::transaction(function () use ($request) {
             $data = [];
 

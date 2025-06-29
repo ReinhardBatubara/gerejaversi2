@@ -16,8 +16,10 @@ class LayananGereja extends Model
         'jenis_layanan',
         'status_aktif',
         'nama_jemaat',
+        'nama_anak',
         'nama_jemaat_laki',
         'nama_jemaat_perempuan',
+        'nama_kegiatan',
         'alamat',
         'alamat_laki',
         'alamat_perempuan',
@@ -32,6 +34,7 @@ class LayananGereja extends Model
         'lingkungan_perempuan',
         'tanggal_layanan',
         'surat_keterangan_warga',
+        'surat_baptis',
         'surat_baptis_laki',
         'surat_baptis_perempuan',
         'surat_naik_sidi_laki',
@@ -44,7 +47,21 @@ class LayananGereja extends Model
         'akta_lahir',
         'keterangan',
         'status',
-        'wijk',
+        'detail_acara',
+        'tanggal_lahir',
+        'alasan',
     ];
+
+    public function pemberitahuan()
+{
+    return $this->hasMany(Pemberitahuan::class, 'jenis_layanan', 'kode');
+}
+
+// Di model LayananGereja
+public function user()
+{
+    return $this->belongsTo(User::class);
+}
+
 
 }

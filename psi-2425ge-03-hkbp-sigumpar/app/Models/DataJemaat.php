@@ -12,9 +12,11 @@ class DataJemaat extends Model
     protected $table = 'datajemaat';
 
     protected $fillable = [
-        'jumlah',
-        'jeniskelamin',
-        'kategori_usia',
-        'tanggal',
+        'jumlah_anak', 
+        'jumlah_remaja', 
+        'jumlah_dewasa', 
+        'jumlah_lansia',  
+        'tanggal', 
+        'week',
     ];
 }

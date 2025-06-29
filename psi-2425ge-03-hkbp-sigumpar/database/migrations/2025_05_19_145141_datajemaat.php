@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('datajemaat', function (Blueprint $table) {
             $table->id();
-            $table->integer('jumlah');
-            $table->string('jeniskelamin');
-            $table->string('kategori_usia');
+            $table->integer('jumlah_anak')->default(0);  // Kolom untuk jumlah anak-anak
+            $table->integer('jumlah_remaja')->default(0);  // Kolom untuk jumlah remaja
+            $table->integer('jumlah_dewasa')->default(0);  // Kolom untuk jumlah dewasa
+            $table->integer('jumlah_lansia')->default(0);  // Kolom untuk jumlah lansia
             $table->date('tanggal');
+            $table->integer('week'); // Menambahkan kolom week
             $table->timestamps();
         });
     }
