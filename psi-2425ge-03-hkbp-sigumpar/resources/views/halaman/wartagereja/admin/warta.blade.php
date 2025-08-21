@@ -1,21 +1,32 @@
-{{-- filepath: resources/views/halaman/wartagereja/admin/warta.blade.php --}}
 <x-app-layout>
+    {{--
+    Filepath: resources/views/halaman/wartagereja/admin/warta.blade.php
+    Halaman ini digunakan oleh admin untuk mengelola warta gereja.
+    Admin dapat melihat warta terbaru, menambah, mengedit, dan menghapus warta.
+    --}}
+
     <link rel="stylesheet" href="/css/beranda.css">
 
     <section class="upcoming-event px-6 py-10 bg-gray-100">
         <br>
         <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-md">
-            {{-- Tampilkan PDF viewer warta terbaru di bagian atas --}}
+
+            {{-- Bagian untuk menampilkan warta terbaru dalam format PDF --}}
             @if ($latestWarta && $latestWarta->file_path)
                 <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Warta Terbaru: {{ $latestWarta->judul }}</h3>
+                    <h3 class="text-xl font-semibold text-gray-700 mb-4">
+                        Warta Terbaru: {{ $latestWarta->judul }}
+                    </h3>
                     <div style="width:100%; max-width:1000px; height:600px; border:1px solid #ccc;">
-                        <iframe src="{{ asset('storage/' . $latestWarta->file_path) }}" 
-                            width="100%" height="100%" style="border:none;">
+                        {{-- Iframe untuk menampilkan file PDF dari storage --}}
+                        <iframe src="{{ asset('storage/'.$latestWarta->file_path) }}" width="100%" height="100%"
+                            style="border:none;">
                         </iframe>
                     </div>
                 </div>
             @endif
+
+            {{-- Judul Halaman dan Tombol Tambah Data --}}
             <div class="flex justify-between items-center mb-6">
                 <h3 class="text-xl font-semibold text-gray-700">Data Warta</h3>
                 <a href="{{ route('warta.create') }}"
@@ -24,6 +35,7 @@
                 </a>
             </div>
 
+            {{-- Tabel untuk menampilkan semua data warta --}}
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-200 text-gray-700">
@@ -34,40 +46,53 @@
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
+                        {{-- Loop melalui setiap warta. Variabel $warta dikirim dari WartaController --}}
                         @forelse ($warta as $item)
-                            <tr>
-                                <td class="px-4 py-2">{{ $item->judul }}</td>
-                                <td class="px-4 py-2">
-                                    @if ($item->file_path)
-                                        <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank"
-                                            class="text-blue-600 underline">Lihat/Download</a>
-                                    @else
-                                        <span class="text-gray-400">Tidak ada file</span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-2 flex gap-2">
-                                    <a href="{{ route('warta.edit', $item->id) }}"
-                                        class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md text-sm">Edit</a>
-                                    <form action="{{ route('warta.destroy', $item->id) }}" method="POST"
-                                        onsubmit="return confirm('Yakin ingin menghapus?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit"
-                                            class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
-                                            Hapus
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
+                        <tr>
+                            <td class="px-4 py-2">{{ $item->judul }}</td>
+                            <td class="px-4 py-2">
+                                {{-- Tampilkan link ke file jika ada, jika tidak tampilkan pesan --}}
+                                @if ($item->file_path)
+                                <a href="{{ asset('storage/'.$item->file_path) }}" target="_blank"
+                                    class="text-blue-600 underline">
+                                    Lihat/Download
+                                </a>
+                                @else
+                                <span class="text-gray-400">Tidak ada file</span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-2 flex gap-2">
+                                {{-- Tombol Edit --}}
+                                <a href="{{ route('warta.edit', $item->id) }}"
+                                    class="bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md text-sm">
+                                    Edit
+                                </a>
+                                {{-- Form untuk tombol Hapus --}}
+                                <form action="{{ route('warta.destroy', $item->id) }}" method="POST"
+                                    onsubmit="return confirm('Yakin ingin menghapus warta ini?')">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit"
+                                        class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-sm">
+                                        Hapus
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
                         @empty
-                            <tr>
-                                <td colspan="3" class="text-center py-4 text-gray-500">Belum ada data warta.</td>
-                            </tr>
+                        {{-- Tampilan jika tidak ada data warta sama sekali --}}
+                        <tr>
+                            <td colspan="3" class="text-center py-4 text-gray-500">
+                                Belum ada data warta.
+                            </td>
+                        </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
         </div>
     </section>
+
+    {{-- Script ini sepertinya tidak ada, pathnya mungkin salah. Akan saya biarkan saja sesuai permintaan. --}}
     <script src="/public/js/script.js"></script>
 </x-app-layout>

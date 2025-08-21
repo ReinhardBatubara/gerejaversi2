@@ -1,53 +1,67 @@
 <x-app-layout>
+    {{--
+    Filepath: resources/views/halaman/wartagereja/user/warta.blade.php
+    Halaman ini menampilkan daftar warta gereja untuk pengguna umum (tidak login/bukan admin).
+    Pengguna dapat melihat warta terbaru dan mengunduh warta dari daftar.
+    --}}
     <link rel="stylesheet" href="/css/beranda.css">
 
     <section class="upcoming-event px-6 py-10 bg-gray-100">
         <br>
         <div class="max-w-5xl mx-auto bg-white p-6 rounded-xl shadow-md">
 
-            {{-- Tampilkan PDF viewer warta terbaru di bagian atas --}}
+            {{-- Bagian untuk menampilkan warta terbaru dalam format PDF --}}
             @if ($latestWarta && $latestWarta->file_path)
-                <div class="mb-8">
-                    <h3 class="text-xl font-semibold text-gray-700 mb-4">Warta Terbaru: {{ $latestWarta->judul }}</h3>
-                    <div style="width:100%; max-width:1000px; height:600px; border:1px solid #ccc;">
-                        <iframe src="{{ asset('storage/' . $latestWarta->file_path) }}" 
-                            width="100%" height="100%" style="border:none;">
-                        </iframe>
-                    </div>
+            <div class="mb-8">
+                <h3 class="text-xl font-semibold text-gray-700 mb-4">
+                    Warta Terbaru: {{ $latestWarta->judul }}
+                </h3>
+                <div style="width:100%; max-width:1000px; height:600px; border:1px solid #ccc;">
+                    {{-- Iframe untuk menampilkan file PDF dari storage --}}
+                    <iframe src="{{ asset('storage/' . $latestWarta->file_path) }}" width="100%" height="100%"
+                        style="border:none;">
+                    </iframe>
                 </div>
+            </div>
             @endif
 
+            {{-- Judul Halaman --}}
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-xl font-semibold text-gray-700">Data Warta</h3>
+                <h3 class="text-xl font-semibold text-gray-700">Arsip Warta</h3>
             </div>
 
+            {{-- Tabel untuk menampilkan semua data warta --}}
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-200 text-gray-700">
                         <tr>
                             <th class="px-4 py-3 text-left text-sm font-semibold">Judul</th>
-                            <th class="px-4 py-3 text-left text-sm font-semibold">File</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold">Unduh File</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
+                        {{-- Loop melalui setiap warta yang dikirim dari controller --}}
                         @forelse ($wartas as $item)
                         <tr>
                             <td class="px-4 py-2">{{ $item->judul }}</td>
                             <td class="px-4 py-2">
+                                {{-- Tampilkan link download jika file ada --}}
                                 @if ($item->file_path)
-                                    {{-- Link Download --}}
-                                    <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank" class="text-blue-600 underline mb-2 inline-block">
-                                        Download
-                                    </a>
-                                    
+                                <a href="{{ asset('storage/' . $item->file_path) }}" target="_blank"
+                                    class="text-blue-600 underline mb-2 inline-block">
+                                    Download
+                                </a>
                                 @else
-                                    <span class="text-gray-400">Tidak ada file</span>
+                                <span class="text-gray-400">Tidak ada file</span>
                                 @endif
                             </td>
                         </tr>
                         @empty
+                        {{-- Tampilan jika tidak ada data warta sama sekali --}}
                         <tr>
-                            <td colspan="3" class="text-center py-4 text-gray-500">Belum ada data warta.</td>
+                            <td colspan="2" class="text-center py-4 text-gray-500">
+                                Belum ada data warta.
+                            </td>
                         </tr>
                         @endforelse
                     </tbody>

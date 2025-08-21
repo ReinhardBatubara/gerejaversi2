@@ -1,4 +1,9 @@
 <x-app-layout>
+    {{--
+    Filepath: resources/views/halaman/berandagereja/user/dashboard.blade.php
+    Halaman ini berfungsi sebagai dashboard utama untuk pengguna umum (bukan admin).
+    Menampilkan informasi yang sama dengan dashboard admin tetapi tanpa tombol aksi (tambah/edit/hapus).
+    --}}
 
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -7,7 +12,9 @@
     </x-slot>
 
     <div class="page-wrapper">
-        <!-- HERO -->
+        {{-- ================================================================= --}}
+        {{--                              HERO SECTION                         --}}
+        {{-- ================================================================= --}}
         <section class="hero" aria-label="Hero Section">
             <div class="hero-content">
                 <img src="/images/LOGO HKBP.png" alt="Logo HKBP" class="logo" />
@@ -24,75 +31,80 @@
             </div>
         </section>
 
-       <!-- PROFIL PENDETA -->
-<section class="pastor-profile" aria-label="Profil Pendeta">
-    <h2>Profil Pendeta</h2>
-    @if ($profile)
-    <div class="profile-container">
-        <div class="photo">
-            <img src="{{ asset('storage/' . $profile->photo_url) }}" alt="Foto Pendeta {{ $profile->nama }}">
-        </div>
-        <div class="info">
-            <h3>{{ $profile->nama }}</h3>
-            <p><strong>Jabatan:</strong> {{ $profile->posisi }}</p>
-            <p>{{ $profile->deskripsi }}</p>
-        </div>
-    </div>
-    @else
-        <p>Profil pendeta belum tersedia.</p>
-    @endif
-</section>
+        {{-- ================================================================= --}}
+        {{--                         PROFIL PENDETA SECTION                    --}}
+        {{-- ================================================================= --}}
+        <section class="pastor-profile" aria-label="Profil Pendeta">
+            <h2>Profil Pendeta</h2>
+            @if ($profile)
+            <div class="profile-container">
+                <div class="photo">
+                    <img src="{{ asset('storage/' . $profile->photo_url) }}" alt="Foto Pendeta {{ $profile->nama }}">
+                </div>
+                <div class="info">
+                    <h3>{{ $profile->nama }}</h3>
+                    <p><strong>Jabatan:</strong> {{ $profile->posisi }}</p>
+                    <p>{{ $profile->deskripsi }}</p>
+                </div>
+            </div>
+            @else
+            <p>Profil pendeta belum tersedia.</p>
+            @endif
+        </section>
 
-
-        <!-- LOKASI GEREJA -->
+        {{-- ================================================================= --}}
+        {{--                         LOKASI GEREJA SECTION                     --}}
+        {{-- ================================================================= --}}
         <section class="lokasi-gereja" aria-label="Lokasi Gereja">
             <h2>Lokasi Gereja</h2>
             @if ($location)
             <div class="map-container">
-                <iframe
-                    src="{{ $location->embed_url }}"
-                    width="100%" height="350" style="border:0;" allowfullscreen="" loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade" title="Peta Lokasi Gereja"></iframe>
+                <iframe src="{{ $location->embed_url }}" width="100%" height="350" style="border:0;"
+                    allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
+                    title="Peta Lokasi Gereja"></iframe>
             </div>
             @else
-                <p>Lokasi gereja belum tersedia.</p>
+            <p>Lokasi gereja belum tersedia.</p>
             @endif
         </section>
 
-        <!-- DOKUMENTASI KEGIATAN -->
+        {{-- ================================================================= --}}
+        {{--                      DOKUMENTASI KEGIATAN SECTION                 --}}
+        {{-- ================================================================= --}}
         <section class="upcoming-event" aria-label="Dokumentasi Kegiatan">
             <div class="upcoming-header">
                 <h2 class="upcoming-title">Dokumentasi Kegiatan</h2>
             </div>
 
-            @if (session('success'))
-                <div class="alert alert-success mb-4">{{ session('success') }}</div>
-            @endif
-
             <div class="center-container">
                 <div class="carousel-wrapper">
+                    {{-- Tombol Navigasi Kiri --}}
                     <button class="arrow left" onclick="moveSlide(-1)" aria-label="Previous">&#10094;</button>
 
+                    {{-- Kontainer Carousel --}}
                     <div class="carousel" id="carousel">
                         @foreach ($events as $index => $event)
-                            <article class="card @if ($index == 0) active @endif" role="group"
-                                aria-roledescription="slide" aria-label="Slide {{ $index + 1 }}">
-                                <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}">
-                                <div class="info">
-                                    <h3>{{ $event->title }}</h3>
-                                    <p>{{ Str::limit($event->description, 150) }}</p>
-                                </div>
-                            </article>
+                        <article class="card @if ($index == 0) active @endif" role="group" aria-roledescription="slide"
+                            aria-label="Slide {{ $index + 1 }}">
+                            <img src="{{ asset('storage/' . $event->image_path) }}" alt="{{ $event->title }}">
+                            <div class="info">
+                                <h3>{{ $event->title }}</h3>
+                                <p>{{ Str::limit($event->description, 150) }}</p>
+                            </div>
+                        </article>
                         @endforeach
                     </div>
 
+                    {{-- Tombol Navigasi Kanan --}}
                     <button class="arrow right" onclick="moveSlide(1)" aria-label="Next">&#10095;</button>
                 </div>
             </div>
         </section>
-
     </div>
 
+    {{-- ================================================================= --}}
+    {{--                         JAVASCRIPT UNTUK CAROUSEL                   --}}
+    {{-- ================================================================= --}}
     <script>
         let currentIndex = 0;
         const cards = document.querySelectorAll('.carousel .card');
@@ -115,7 +127,9 @@
         });
     </script>
 
-
+    {{-- ================================================================= --}}
+    {{--                          EMBEDDED CSS STYLES                        --}}
+    {{-- ================================================================= --}}
     <style>
         .page-wrapper {
             background-color: #f5f7fa;
@@ -146,21 +160,19 @@
         .logo {
             width: 140px;
             height: auto;
-            margin: 0 auto 1rem auto; /* atas 0, kanan auto, bawah 1rem, kiri auto */
+            margin: 0 auto 1rem auto;
             display: block;
         }
 
-
         .church-name {
-           font-size: 1.6rem;
-           font-weight: 700;
-           color: #003366;
-           margin-bottom: 1rem;
-           display: block;
-           text-align: center;
-           transform: translateX(20px); /* geser ke kanan 20px */
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #003366;
+            margin-bottom: 1rem;
+            display: block;
+            text-align: center;
+            transform: translateX(20px);
         }
-
 
         .ayat {
             font-size: 1.1rem;
@@ -170,10 +182,10 @@
             margin-bottom: 1.8rem;
             margin-left: 20px;
         }
-        
+
         .ayat .intro {
             display: block;
-            margin-left: 180px; /* Geser ke kanan */
+            margin-left: 180px;
         }
 
         .ayat q {
@@ -182,32 +194,31 @@
             color: #003366;
         }
 
-.ayat em {
-    display: block;
-    margin-left: 220px; /* Geser ke kanan */
-    margin-top: 0.5rem;
-    font-weight: 600;
-    color: #666;
-}
+        .ayat em {
+            display: block;
+            margin-left: 220px;
+            margin-top: 0.5rem;
+            font-weight: 600;
+            color: #666;
+        }
 
-.cta {
-    font-size: 1.5rem;
-    font-weight: 600;
-    background: linear-gradient(to right, #003366, #0055aa);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-align: center;
-    margin: 30px auto;
-    display: block;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
-    transition: transform 0.4s ease-in-out;
-}
+        .cta {
+            font-size: 1.5rem;
+            font-weight: 600;
+            background: linear-gradient(to right, #003366, #0055aa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+            margin: 30px auto;
+            display: block;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            transition: transform 0.4s ease-in-out;
+        }
 
-.cta:hover {
-    transform: scale(1.05);
-    text-shadow: 3px 3px 6px rgba(0,0,0,0.3);
-}
-
+        .cta:hover {
+            transform: scale(1.05);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.3);
+        }
 
         .hero-image {
             flex: 1 1 300px;
@@ -248,9 +259,9 @@
         }
 
         .photo {
-           flex: 1 1 250px;
-           max-width: 250px;
-           transform: translateX(-20px); /* geser ke kiri 20px */
+            flex: 1 1 250px;
+            max-width: 250px;
+            transform: translateX(-20px);
         }
 
         .photo img {
@@ -285,28 +296,27 @@
             margin-bottom: 3rem;
         }
 
-         .upcoming-header {
-                text-align: center;
-                margin-bottom: 2rem;
-            }
+        .upcoming-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
 
         .upcoming-header h2 {
-                font-size: 2rem;
-                font-weight: bold;
-                color: #003366;
-                margin-bottom: 1rem;
-            }
+            font-size: 2rem;
+            font-weight: bold;
+            color: #003366;
+            margin-bottom: 1rem;
+        }
 
         .upcoming-header .btn {
-                display: inline-block;
-                margin-top: 0.5rem;
-            }
-
+            display: inline-block;
+            margin-top: 0.5rem;
+        }
 
         /* CAROUSEL */
         .carousel-wrapper {
             max-width: 900px;
-            width : 100%;
+            width: 100%;
             margin: 0 auto 3rem auto;
             position: relative;
         }
