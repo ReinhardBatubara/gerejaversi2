@@ -13,6 +13,9 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+        {{-- Slot untuk CSS atau tag head tambahan --}}
+        {{ $head ?? '' }}
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
@@ -34,5 +37,8 @@
 
             @include('layouts.footer')
         </div>
+
+        {{-- Slot untuk script tambahan di akhir body --}}
+        {{ $scripts ?? '' }}
     </body>
 </html>
