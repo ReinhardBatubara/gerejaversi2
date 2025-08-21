@@ -85,7 +85,7 @@ class WartaController extends Controller
         });
 
         // Arahkan kembali ke halaman index warta setelah berhasil.
-        return redirect()->route('warta.index')->with('success', 'Warta berhasil ditambahkan.');
+        return redirect()->route('warta')->with('success', 'Warta berhasil ditambahkan.');
     }
 
     /**
